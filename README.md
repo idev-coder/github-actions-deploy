@@ -66,9 +66,10 @@ Set GitHub silent `true` by default.
 
 ### `repo`
 
-Example GitHub repo `[onwner]/[repo]`
+Set Example GitHub repo `[onwner]/[repo]`
 
 ### `tag`
+Set Example GitHub tag `[tag]`
 
 ## Example usage
 
