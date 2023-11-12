@@ -24,7 +24,7 @@ inputs:
   add:
     description: 'GitHub add'
     required: false
-    default: 'true'
+    default: 'false'
   git:
     description: 'GitHub git'
     required: false
@@ -36,7 +36,7 @@ inputs:
   dotfiles:
     description: 'GitHub dotfiles'
     required: false
-    default: 'true'
+    default: 'false'
   branch:
     description: 'GitHub branch'
     required: false
@@ -68,7 +68,7 @@ inputs:
   silent:
     description: 'GitHub silent'
     required: false
-    default: 'true'
+    default: 'false'
   repo:
     description: 'GitHub repo'
     required: false
