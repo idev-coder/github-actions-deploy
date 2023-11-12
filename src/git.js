@@ -229,41 +229,26 @@ Git.prototype.setRemoteUrl = function (options) {
     let remoteURL = `https://x-access-token:${options.github_token}@${options.domain}/${options.repo}.git`
 
     return this.exec('remote', 'set-url', options.remote, remoteURL).then((git) => {
-        console.log(git);
-        return this.exec('config', '--get', 'remote.' + options.remote + '.url')
-            .then((git) => {
-                const repo = git.output && git.output.split(/[\n\r]/).shift();
-                if (repo) {
-                    return repo;
-                } else {
-                    throw new Error(
-                        'Failed to get repo URL from options or current directory.'
-                    );
-                }
-            })
-            .catch((err) => {
-                throw new Error(
-                    'Failed to get remote.' +
-                    remote +
-                    '.url (task must either be ' +
-                    'run in a git repository with a configured ' +
-                    remote +
-                    ' remote ' +
-                    'or must be configured with the "repo" option).'
-                );
-            });
-
+        const repo = git.output && git.output.split(/[\n\r]/).shift();
+        if (repo) {
+            return repo;
+        } else {
+            throw new Error(
+                'Failed to get repo URL from options or current directory.'
+            );
+        }
     })
         .catch((err) => {
-            throw new Error(
-                'Failed to set remote' +
-                remoteURL +
-                ' (task must either be ' +
-                'run in a git repository with a configured ' +
-                remoteURL +
-                ' remote ' +
-                'or must be configured with the "repo" option).'
-            );
+            throw new Error(err)
+            // throw new Error(
+            //     'Failed to set remote' +
+            //     remoteURL +
+            //     ' (task must either be ' +
+            //     'run in a git repository with a configured ' +
+            //     remoteURL +
+            //     ' remote ' +
+            //     'or must be configured with the "repo" option).'
+            // );
         });
 };
 
