@@ -35,18 +35,18 @@ function getRepo(options) {
 exports.defaults = {
     dist: core.getInput('dist') || 'dist',
     dest: core.getInput('dest') || '.',
-    add: typeof core.getInput('add') == "boolean" ? core.getInput('add') : !!core.getInput('add') || false,
+    add: typeof core.getInput('add') == "boolean" ? core.getInput('add') : core.getInput('add') === "true" ? true : false || false,
     git: core.getInput('git') || 'git',
     depth: core.getInput('depth') || 1,
-    dotfiles: typeof core.getInput('dotfiles') == "boolean" ? core.getInput('dotfiles') : !!core.getInput('dotfiles') || false,
+    dotfiles: typeof core.getInput('dotfiles') == "boolean" ? core.getInput('dotfiles') : core.getInput('dotfiles') === "true" ? true : false || false,
     branch: core.getInput('branch') || 'gh-pages',
     remote: core.getInput('remote') || 'origin',
     src: core.getInput('src') || '**/*',
     remove: core.getInput('remove') || '.',
-    push: typeof core.getInput('push') == "boolean" ? core.getInput('push') : !!core.getInput('push') || true,
-    history: typeof core.getInput('history') == "boolean" ? core.getInput('history') : !!core.getInput('history') || true,
+    push: typeof core.getInput('push') == "boolean" ? core.getInput('push') : core.getInput('push') === "true" ? true : false || true,
+    history: typeof core.getInput('history') == "boolean" ? core.getInput('history') : core.getInput('history') === "true" ? true : false || true,
     message: core.getInput('message') || 'Updates',
-    silent: typeof core.getInput('silent') == "boolean" ? core.getInput('silent') : !!core.getInput('silent') || false,
+    silent: typeof core.getInput('silent') == "boolean" ? core.getInput('silent') : core.getInput('silent') === "true" ? true : false || false,
 };
 
 /**
