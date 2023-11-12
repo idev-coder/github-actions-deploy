@@ -75,6 +75,12 @@ inputs:
   tag:
     description: 'GitHub tag'
     required: false
+  username:
+    description: 'GitHub username'
+    required: false
+  email:
+    description: 'GitHub email'
+    required: false
 runs:
   using: 'node16'
   main: 'dist/index.js'

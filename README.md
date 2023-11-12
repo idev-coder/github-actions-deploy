@@ -71,6 +71,12 @@ Set Example GitHub repo `[onwner]/[repo]`
 ### `tag`
 Set Example GitHub tag `[tag]`
 
+### `username`
+Set Example GitHub username `[username]`
+
+### `email`
+Set Example GitHub email `[email]`
+
 ## Example usage
 
 ```
@@ -90,7 +96,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Github Actions Deploy
-        uses: idev-coder/github-actions-deploy@v1.0
+        uses: idev-coder/github-actions-deploy@v1.0.3
         with:
           dist: 'dist'
           branch: 'gh-pages'
