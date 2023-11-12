@@ -28,8 +28,8 @@ exports.getCacheDir = getCacheDir;
 
 function getRepo(options) {
     const git = new Git(process.cwd(), options.git);
-    git.setRemoteUrl(options);
-    return git.getRemoteUrl(options.remote);
+
+    return git.setRemoteUrl(options);
 }
 
 exports.defaults = {

@@ -2,6 +2,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const util = require('util');
 const exec = require('@actions/exec');
+const { reject } = require('async');
 
 
 /**
@@ -226,7 +227,10 @@ Git.prototype.getRemoteUrl = function (remote) {
 
 Git.prototype.setRemoteUrl = function (options) {
     let remoteURL = `https://x-access-token:${options.github_token}@${options.domain}/${options.repo}.git`
-    return this.exec('remote', 'set-url', options.remote, remoteURL)
+    this.exec('remote', 'set-url', options.remote, remoteURL)
+    return new Promise((resolve, reject) => {
+        resolve(remoteURL)
+    })
 };
 
 
