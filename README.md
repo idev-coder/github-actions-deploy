@@ -96,7 +96,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Github Actions Deploy
-        uses: idev-coder/github-actions-deploy@v1.0.3
+        uses: idev-coder/github-actions-deploy@v1.0.4
         with:
           dist: 'dist'
           branch: 'gh-pages'
