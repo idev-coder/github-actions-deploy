@@ -94,6 +94,6 @@ jobs:
           dist: 'dist'
           branch: 'gh-pages'
         env:
-          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 
 ```
