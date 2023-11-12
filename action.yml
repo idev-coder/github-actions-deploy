@@ -1,0 +1,81 @@
+name: 'Github Actions Deploy'
+description: 'GitHub Action to deploy to GitHub Pages'
+author: 'idev-coder'
+branding:
+  icon: 'upload-cloud'
+  color: 'yellow'
+
+inputs:
+  domain:
+    description: 'GitHub domain'
+    required: false
+    default: 'github.com'
+  github_token:
+    description: 'GitHub token'
+    required: false
+    default: ${{secrets.GITHUB_TOKEN}}
+  dist:
+    description: 'GitHub dist'
+    required: false
+    default: 'dist'
+  dest:
+    description: 'GitHub dest'
+    required: false
+    default: '.'
+  add:
+    description: 'GitHub add'
+    required: false
+    default: 'true'
+  git:
+    description: 'GitHub git'
+    required: false
+    default: 'git'
+  depth:
+    description: 'GitHub depth'
+    required: false
+    default: 1
+  dotfiles:
+    description: 'GitHub dotfiles'
+    required: false
+    default: 'true'
+  branch:
+    description: 'GitHub branch'
+    required: false
+    default: 'gh-pages'
+  remote:
+    description: 'GitHub remote'
+    required: false
+    default: 'origin'
+  src:
+    description: 'GitHub src'
+    required: false
+    default: '**/*'
+  remove:
+    description: 'GitHub remove'
+    required: false
+    default: '.'
+  push:
+    description: 'GitHub push'
+    required: false
+    default: 'true'
+  history:
+    description: 'GitHub history'
+    required: false
+    default: 'true'
+  message:
+    description: 'GitHub message'
+    required: false
+    default: 'Updates'
+  silent:
+    description: 'GitHub silent'
+    required: false
+    default: 'true'
+  repo:
+    description: 'GitHub repo'
+    required: false
+  tag:
+    description: 'GitHub tag'
+    required: false
+runs:
+  using: 'node16'
+  main: 'dist/index.js'

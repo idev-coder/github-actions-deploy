@@ -1,0 +1,27 @@
+{
+  "name": "github-actions-deploy",
+  "version": "1.0.0",
+  "description": "GitHub Action to deploy to GitHub Pages",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "ncc build src/index.js --minify",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@vercel/ncc": "^0.38.1"
+  },
+  "dependencies": {
+    "@actions/core": "^1.10.1",
+    "@actions/exec": "^1.1.1",
+    "@actions/github": "^6.0.0",
+    "async": "^3.2.5",
+    "email-addresses": "^5.0.0",
+    "filenamify": "^6.0.0",
+    "find-cache-dir": "^5.0.0",
+    "fs-extra": "^11.1.1",
+    "globby": "^14.0.0"
+  }
+}

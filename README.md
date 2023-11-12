@@ -1,0 +1,99 @@
+# Github Actions Deploy
+
+Action for getting information from package.json file
+
+## Inputs
+
+### `domain`
+
+Set GitHub Domain `github.com` by default.
+
+### `github_token`
+
+Set GitHub token `${{secrets.GITHUB_TOKEN}}` by default.
+
+### `dist`
+
+Set GitHub dist `dist` by default.
+
+### `dest`
+
+Set GitHub dest `.` by default.
+
+### `add`
+
+Set GitHub add `true` by default.
+
+### `git`
+
+Set GitHub git `git` by default.
+
+### `depth`
+
+Set GitHub depth `1` by default.
+
+### `dotfiles`
+
+Set GitHub dotfiles `true` by default.
+
+### `branch`
+
+Set GitHub branch `gh-pages` by default.
+
+### `remote`
+
+Set GitHub remote `origin` by default.
+
+### `src`
+
+Set GitHub src `**/*` by default.
+
+### `remove`
+
+Set GitHub remove `.` by default.
+
+### `push`
+
+Set GitHub push `true` by default.
+
+### `message`
+
+Set GitHub message `Updates` by default.
+
+### `silent`
+
+Set GitHub silent `true` by default.
+
+### `repo`
+
+Example GitHub repo `[onwner]/[repo]`
+
+### `tag`
+
+## Example usage
+
+```
+name: GitHub Pages
+
+on:
+  push:
+    branches:
+      - main  # Set a branch name to trigger deployment
+  pull_request:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Github Actions Deploy
+        uses: idev-coder/github-actions-deploy@v1.0
+        with:
+          dist: 'dist'
+          branch: 'gh-pages'
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+
+```
