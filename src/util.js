@@ -2,6 +2,7 @@ const path = require('path');
 const Git = require('./git.js');
 const async = require('async');
 const fs = require('fs-extra');
+const github = require('@actions/github');
 
 /**
  * Generate a list of unique directory paths given a list of file paths.
@@ -160,8 +161,8 @@ exports.copy = function (files, base, dest) {
 
 exports.getUser = function (cwd) {
     return Promise.all([
-        new Git(cwd).exec('config', 'user.name', `${process.env.GITHUB_ACTOR}`),
-        new Git(cwd).exec('config', 'user.email', `${process.env.GITHUB_ACTOR}@users.noreply.github.com`),
+        new Git(cwd).exec('config', 'user.name', `${github.context.repo.owner}`),
+        new Git(cwd).exec('config', 'user.email', `${github.context.repo.owner}@users.noreply.github.com`),
     ])
         .then((results) => {
             return { name: results[0].output.trim(), email: results[1].output.trim() };
