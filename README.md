@@ -10,7 +10,7 @@ Set GitHub Domain `github.com` by default.
 
 ### `github_token`
 
-Set GitHub token `${{secrets.GITHUB_TOKEN}}` by default.
+Set GitHub token `${{secrets.GITHUB_TOKEN}}`
 
 ### `dist`
 

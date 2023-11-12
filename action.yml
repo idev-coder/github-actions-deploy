@@ -13,7 +13,6 @@ inputs:
   github_token:
     description: 'GitHub token'
     required: false
-    default: ${{secrets.GITHUB_TOKEN}}
   dist:
     description: 'GitHub dist'
     required: false
