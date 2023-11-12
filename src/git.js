@@ -227,10 +227,28 @@ Git.prototype.getRemoteUrl = function (remote) {
 
 Git.prototype.setRemoteUrl = function (options) {
     let remoteURL = `https://x-access-token:${options.github_token}@${options.domain}/${options.repo}.git`
-    this.exec('remote', 'set-url', options.remote, remoteURL)
-    return new Promise((resolve, reject) => {
-        resolve(remoteURL)
+
+    return this.exec('remote', 'set-url', options.remote, remoteURL).then((git) => {
+        const repo = git.output && git.output.split(/[\n\r]/).shift();
+        if (repo) {
+            return repo;
+        } else {
+            throw new Error(
+                'Failed to get repo URL from options or current directory.'
+            );
+        }
     })
+        .catch((err) => {
+            throw new Error(
+                'Failed to set remote' +
+                remoteURL +
+                ' (task must either be ' +
+                'run in a git repository with a configured ' +
+                remoteURL +
+                ' remote ' +
+                'or must be configured with the "repo" option).'
+            );
+        });
 };
 
 
