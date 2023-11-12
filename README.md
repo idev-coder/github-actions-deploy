@@ -1,6 +1,6 @@
 # Github Actions Deploy
 
-Action for getting information from package.json file
+ See also the GitHub official GitHub Pages Action first.
 
 ## Inputs
 
