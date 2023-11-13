@@ -21,7 +21,7 @@ jobs:
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           dist: 'dist'
-          branch: gh-pages
+          branch: test
           message: 'Updates Test'
           dotfiles: true
           add: true
