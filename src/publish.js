@@ -56,7 +56,7 @@ exports.defaults = {
  * @param {Function} callback Callback.
  * @return {Promise} A promise.
  */
-exports.publish = function publish(basePath, config, callback) {
+exports.publish = (basePath, config, callback) => {
   if (typeof config === 'function') {
     callback = config;
     config = {};
@@ -251,6 +251,6 @@ exports.publish = function publish(basePath, config, callback) {
 /**
  * Clean the cache directory.
  */
-exports.clean = function clean() {
+exports.clean = () => {
   fs.removeSync(getCacheDir());
 };

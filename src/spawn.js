@@ -1,6 +1,6 @@
 const exec = require('@actions/exec');
 
-exports.spawn = function spawn(exe, args, cwd) {
+exports.spawn = (exe, args, cwd) => {
     return new Promise((resolve, reject) => {
         const buffer = [];
         exec.exec(exe, args, {

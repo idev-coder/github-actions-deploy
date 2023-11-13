@@ -3,6 +3,7 @@ const path = require('path');
 const core = require('@actions/core');
 const addr = require('email-addresses');
 const github = require('@actions/github');
+const { getOctokit, context } = require('@actions/github');
 const { publish, defaults } = require('./publish');
 const { spawn } = require('./spawn')
 const { createBranch } = require('./create-branch')
@@ -109,13 +110,13 @@ function main() {
         spawn("git", ["remote", "set-url", newOptions.remote, repo])
 
         core.debug(`Creating branch ${newOptions.branch}`);
-        createBranch(github.getOctokit, github.context, newOptions).then((isCreated) => {
-            core.setOutput('created', Boolean(isCreated));
+        createBranch(getOctokit, context, newOptions).then((isCreated) => {
+            core.setOutput('created', isCreated);
         }).catch((error) => {
             core.setFailed(error.message);
         })
 
-        // return deploy(options.dist, config);
+        return deploy(options.dist, config);
 
     });
 }
