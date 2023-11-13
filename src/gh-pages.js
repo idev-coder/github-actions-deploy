@@ -30,7 +30,6 @@ function getRepo(git, options) {
     if (options.repo) {
         return Promise.resolve(options.repo);
     } else {
-
         return git.getRemoteUrl(options.remote);
     }
 }
@@ -65,7 +64,7 @@ exports.publish = function publish(basePath, config, callback) {
     }
 
     const options = Object.assign({}, exports.defaults, config);
-
+    const git = new Git(process.cwd(), options.git);
     // For backward compatibility before fixing #334
     if (options.only) {
         options.remove = options.only;
@@ -122,23 +121,23 @@ exports.publish = function publish(basePath, config, callback) {
         userPromise = getUser();
     }
 
-    const git = new Git(process.cwd(), options.git);
 
-    if (config.user) {
-        git.exec("config", "--global", "user.email", config.user.email)
-        git.exec("config", "--global", "user.name", config.user.name)
+    if (options.user) {
+        git.exec("config", "--global", "user.email", options.user.email)
+        git.exec("config", "--global", "user.name", options.user.name)
     }
 
-    if (config.repo) {
-        git.exec("remote", "set-url", config.remote, config.repo)
+    if (options.repo) {
+        git.exec("remote", "set-url", options.remote, options.repo)
     }
 
     git.exec("config", "--global", "user.email", `${github.context.actor}@users.noreply.github.com`)
     git.exec("config", "--global", "user.name", `${github.context.actor}`)
-    git.exec("remote", "set-url", config.remote, `https://${github.context.actor}:${config.github_token}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`)
+    git.exec("remote", "set-url", options.remote, `https://${github.context.actor}:${options.github_token}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`)
+   
 
     return userPromise.then((user) =>
-        getRepo(git,options)
+        getRepo(options)
             .then((repo) => {
                 repoUrl = repo;
                 const clone = getCacheDir(repo);
