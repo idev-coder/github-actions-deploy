@@ -28,8 +28,8 @@ exports.getCacheDir = getCacheDir;
 
 function getRepo(options) {
     const git = new Git(process.cwd(), options.git);
-
-    return git.setRemoteUrl(options);
+    git.setRemoteUrl(options);
+    return git.getRemoteUrl(options.remote);
 }
 
 exports.defaults = {
@@ -125,6 +125,7 @@ exports.publish = function publish(basePath, config, callback) {
                 repoUrl = repo;
                 const clone = getCacheDir(repo);
                 log('Cloning %s into %s', repo, clone);
+                console.log('Cloning %s into %s', repo, clone);
                 return Git.clone(repo, clone, options.branch, options);
             })
             .then((git) => {

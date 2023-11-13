@@ -1,9 +1,8 @@
 const fs = require('fs-extra');
 const path = require('path');
 const util = require('util');
-const exec = require('@actions/exec');
-const { reject } = require('async');
-
+const cp = require('child_process');
+const github = require('@actions/github');
 
 /**
  * @function Object() { [native code] }
@@ -29,7 +28,7 @@ util.inherits(ProcessError, Error);
  */
 function spawn(exe, args, cwd) {
     return new Promise((resolve, reject) => {
-        const child = exec.exec(exe, args, { cwd: cwd || process.cwd() });
+        const child = cp.spawn(exe, args, { cwd: cwd || process.cwd() });
         const buffer = [];
         child.stderr.on('data', (chunk) => {
             buffer.push(chunk.toString());
@@ -226,30 +225,29 @@ Git.prototype.getRemoteUrl = function (remote) {
 };
 
 Git.prototype.setRemoteUrl = function (options) {
-    let remoteURL = `https://x-access-token:${options.github_token}@${options.domain}/${options.repo}.git`
+    let remoteURL = `https://x-access-token:${options.github_token}@${options.domain}/${github.context.repo.owner}/${github.context.repo.repo}.git`
 
     return this.exec('remote', 'set-url', options.remote, remoteURL).then((git) => {
-        // const repo = git.output && git.output.split(/[\n\r]/).shift();
-        // if (repo) {
-        //     return repo;
-        // } else {
-        //     throw new Error(
-        //         'Failed to get repo URL from options or current directory.'
-        //     );
-        // }
-        return remoteURL
+        // console.log(git);
+        const repo = options.repo ? options.repo : remoteURL
+        if (repo) {
+            return repo;
+        } else {
+            throw new Error(
+                'Failed to get repo URL from options or current directory.'
+            );
+        }
     })
         .catch((err) => {
-            throw new Error(err)
-            // throw new Error(
-            //     'Failed to set remote' +
-            //     remoteURL +
-            //     ' (task must either be ' +
-            //     'run in a git repository with a configured ' +
-            //     remoteURL +
-            //     ' remote ' +
-            //     'or must be configured with the "repo" option).'
-            // );
+            throw new Error(
+                'Failed to set remote' +
+                remoteURL +
+                ' (task must either be ' +
+                'run in a git repository with a configured ' +
+                remoteURL +
+                ' remote ' +
+                'or must be configured with the "repo" option).'
+            );
         });
 };
 

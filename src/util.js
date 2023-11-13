@@ -2,7 +2,6 @@ const path = require('path');
 const Git = require('./git.js');
 const async = require('async');
 const fs = require('fs-extra');
-const github = require('@actions/github');
 
 /**
  * Generate a list of unique directory paths given a list of file paths.

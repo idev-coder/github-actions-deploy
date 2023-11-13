@@ -66,7 +66,7 @@ Set GitHub silent `true` by default.
 
 ### `repo`
 
-Set Example GitHub repo `[onwner]/[repo]`
+Set Example GitHub repo `https://x-access-token:${{secrets.GITHUB_TOKEN}}@github.com/user/private-repo.git`
 
 ### `tag`
 Set Example GitHub tag `[tag]`
@@ -96,7 +96,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - name: Github Actions Deploy
-        uses: idev-coder/github-actions-deploy@v1.0.7
+        uses: idev-coder/github-actions-deploy@v1.1.3
         with:
           dist: 'dist'
           branch: 'gh-pages'

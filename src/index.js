@@ -4,7 +4,6 @@ const ghpages = require('./publish');
 const path = require('path');
 const core = require('@actions/core');
 const github = require('@actions/github');
-const addr = require('email-addresses');
 
 function publish(dist, config) {
     return new Promise((resolve, reject) => {
@@ -38,11 +37,10 @@ function main(args) {
             history: typeof core.getInput('history') == "boolean" ? core.getInput('history') : core.getInput('history') === "true" ? true : false || true,
             message: core.getInput('message') || 'Updates',
             silent: typeof core.getInput('silent') == "boolean" ? core.getInput('silent') : core.getInput('silent') === "true" ? true : false || false,
-            repo: core.getInput('repo') || process.env['GITHUB_REPOSITORY'] || `${github.context.repo.owner}/${github.context.repo.repo}`,
-            tag: core.getInput('tag'),
+            repo: core.getInput('repo'),
             user: {
-                name: core.getInput('username') || `${github.context.repo.owner}`,
-                email: core.getInput('email') || `${github.context.repo.owner}@users.noreply.github.com`
+                name: core.getInput('username'),
+                email: core.getInput('email')
             }
 
         }
