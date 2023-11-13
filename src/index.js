@@ -135,7 +135,7 @@ function main(args) {
         spawn("git", ["config", "--global", "user.email", `${github.context.actor}@users.noreply.github.com`])
         spawn("git", ["config", "--global", "user.name", `${github.context.actor}`])
         spawn("git", ["remote", "set-url", config.remote, `https://${github.context.actor}:${config.github_token}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`])
-
+        spawn("ls")
         return publish(options.dist, config);
     });
 }
