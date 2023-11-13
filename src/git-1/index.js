@@ -1,35 +1,11 @@
 #!/usr/bin/env node
 const path = require('path');
 const core = require('@actions/core');
-const ghpages = require('gh-pages');
+const ghpages = require('./gh-pages');
 const addr = require('email-addresses');
-const github = require('@actions/github');
-const cp = require('child_process');
-
-function spawn(exe, args, cwd) {
-    return new Promise((resolve, reject) => {
-        const child = cp.spawn(exe, args, { cwd: cwd || process.cwd() });
-        const buffer = [];
-        child.stderr.on('data', (chunk) => {
-            buffer.push(chunk.toString());
-        });
-        child.stdout.on('data', (chunk) => {
-            buffer.push(chunk.toString());
-        });
-        child.on('close', (code) => {
-            const output = buffer.join('');
-            if (code) {
-                const msg = output || 'Process failed: ' + code;
-                reject(new ProcessError(code, msg));
-            } else {
-                resolve(output);
-            }
-        });
-    });
-}
+// const github = require('@actions/github');
 
 function publish(dist, config) {
-
     return new Promise((resolve, reject) => {
         const basePath = path.resolve(process.cwd(), dist);
         ghpages.publish(basePath, config, (err) => {
@@ -118,20 +94,6 @@ function main(args) {
             user: user,
             beforeAdd: beforeAdd,
         };
-
-
-        if (config.user) {
-            spawn("git", ["config", "--global", "user.email", config.user.email])
-            spawn("git", ["config", "--global", "user.name", config.user.name])
-        }
-
-        if (config.repo) {
-            spawn("git", ["remote", "set-url", config.remote, config.repo])
-        }
-
-        spawn("git", ["config", "--global", "user.email", `${github.context.actor}@users.noreply.github.com`])
-        spawn("git", ["config", "--global", "user.name", `${github.context.actor}`])
-        spawn("git", ["remote", "set-url", config.remote, `https://${github.context.actor}:${config.github_token}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`])
 
         return publish(options.dist, config);
     });
