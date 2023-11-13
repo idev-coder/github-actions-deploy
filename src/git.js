@@ -167,7 +167,7 @@ Git.prototype.add = function (files) {
  * @return {Promise} A promise.
  */
 Git.prototype.commit = function (message) {
-    return  this.exec('commit', '-m', message)
+    return this.exec('commit', '-m', message)
 };
 
 /**
@@ -250,15 +250,13 @@ Git.clone = function clone(repo, dir, branch, options) {
             return fs.mkdirp(path.dirname(path.resolve(dir))).then(() => {
                 const args = [
                     'clone',
-                    repo,
-                    dir,
-                    '--branch',
-                    branch,
-                    '--single-branch',
-                    '--origin',
-                    options.remote,
                     '--depth',
                     options.depth,
+                    '--single-branch',
+                    '--branch',
+                    branch,
+                    repo,
+                    dir
                 ];
                 return spawn(options.git, args)
                     .catch((err) => {
