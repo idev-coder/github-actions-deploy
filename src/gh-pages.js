@@ -32,7 +32,7 @@ function getRepo(options) {
     git.exec('remote', 'set-url', options.remote, options.repo)
     return git.getRemoteUrl(options.remote);
   } else {
-    git.exec('remote', 'set-url', options.remote, `https://${github.context.actor}:${options.github_token || process.env.GITHUB_TOKEN}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`)
+    git.exec('remote', 'set-url', options.remote, `https://${github.context.actor}:${options.github_token}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`)
     return git.getRemoteUrl(options.remote);
   }
 }

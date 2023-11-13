@@ -21,6 +21,7 @@ function main(args) {
     // github.getOctokit(core.getInput('github_token')|| process.env.GITHUB_TOKEN)
     return Promise.resolve().then(() => {
         const options = {
+            github_token: core.getInput('github_token') || process.env.GITHUB_TOKEN,
             dist: core.getInput('dist'),
             src: core.getInput('src') || ghpages.defaults.src,
             branch: core.getInput('branch') || ghpages.defaults.branch,
@@ -74,6 +75,7 @@ function main(args) {
 
 
         const config = {
+            github_token: options.github_token,
             repo: options.repo,
             silent: !!options.silent,
             branch: options.branch,
