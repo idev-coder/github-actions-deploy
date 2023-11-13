@@ -3,7 +3,7 @@ const path = require('path');
 const core = require('@actions/core');
 const ghpages = require('./gh-pages');
 const addr = require('email-addresses');
-const github = require('@actions/github');
+// const github = require('@actions/github');
 
 function publish(dist, config) {
     return new Promise((resolve, reject) => {
@@ -18,7 +18,7 @@ function publish(dist, config) {
 }
 
 function main(args) {
-    github.getOctokit(core.getInput('github_token')|| process.env.GITHUB_TOKEN)
+    // github.getOctokit(core.getInput('github_token')|| process.env.GITHUB_TOKEN)
     return Promise.resolve().then(() => {
         const options = {
             dist: core.getInput('dist'),

@@ -27,7 +27,6 @@ util.inherits(ProcessError, Error);
  */
 function spawn(exe, args, cwd) {
     return new Promise((resolve, reject) => {
-        // const child = cp.spawn(exe, args, {cwd: cwd || process.cwd()});
         const buffer = [];
         exec.exec(exe, args, {
             cwd: cwd || process.cwd(),
@@ -48,23 +47,6 @@ function spawn(exe, args, cwd) {
                 resolve(output);
             }
         })
-
-
-        // child.stderr.on('data', (chunk) => {
-        //     buffer.push(chunk.toString());
-        // });
-        // child.stdout.on('data', (chunk) => {
-        //     buffer.push(chunk.toString());
-        // });
-        // child.on('close', (code) => {
-        //     const output = buffer.join('');
-        //     if (code) {
-        //         const msg = output || 'Process failed: ' + code;
-        //         reject(new ProcessError(code, msg));
-        //     } else {
-        //         resolve(output);
-        //     }
-        // });
     });
 }
 
@@ -185,9 +167,7 @@ Git.prototype.add = function (files) {
  * @return {Promise} A promise.
  */
 Git.prototype.commit = function (message) {
-    return this.exec('diff-index', '--quiet', 'HEAD').catch(() =>
-        this.exec('commit', '-m', message)
-    );
+    return this.exec('commit', '-m', message)
 };
 
 /**
