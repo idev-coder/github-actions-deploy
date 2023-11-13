@@ -98,7 +98,8 @@ function main(args) {
 }
 
 main(process.argv)
-    .then(() => {
+    .then((git) => {
+        process.stdout.write(git);
         process.stdout.write('Published\n');
     })
     .catch((err) => {

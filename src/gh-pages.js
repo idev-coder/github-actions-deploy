@@ -81,11 +81,11 @@ exports.publish = function publish(basePath, config, callback) {
     };
   }
 
-  function done(err) {
+  function done(git) {
     try {
-      callback(err);
-    } catch (err2) {
-      log('Publish callback threw: %s', err2.message);
+      callback(git);
+    } catch (err) {
+      log('Publish callback threw: %s', err.message);
     }
   }
 
@@ -239,7 +239,7 @@ exports.publish = function publish(basePath, config, callback) {
         }
       })
       .then(
-        () => done(),
+        (git) => done(git),
         (error) => {
           if (options.silent) {
             error = new Error(
