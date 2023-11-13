@@ -23,6 +23,7 @@ jobs:
       - name: Github Actions Deploy
         uses: idev-coder/github-actions-deploy@v1.1.4
         with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
           dist: '<dist>' # Base directory for all source files
           src: '<src>' # Pattern used to select which files to publish set '**/*' by default.
           branch: '<branch>' # Name of the branch you are pushing to set 'gh-pages' by default.
@@ -41,5 +42,6 @@ jobs:
           no-push: true # Commit only (with no push)
           no-history: true # Push force new commit without parent history
           before-add: '<file>' # Execute the function exported by <file> before "git add"
-
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
 ```

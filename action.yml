@@ -6,6 +6,9 @@ branding:
   color: 'yellow'
 
 inputs:
+  github_token: 
+    description: 'Github Token'
+    required: false
   dist:
     description: 'Base directory for all source files'
     required: false

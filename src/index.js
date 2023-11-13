@@ -18,7 +18,7 @@ function publish(dist, config) {
 }
 
 function main(args) {
-    github.getOctokit(core.getInput('github_token'))
+    github.getOctokit(core.getInput('github_token')|| process.env.GITHUB_TOKEN)
     return Promise.resolve().then(() => {
         const options = {
             dist: core.getInput('dist'),
