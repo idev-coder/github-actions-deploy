@@ -11,6 +11,32 @@ const github = require('@actions/github');
 
 const log = util.debuglog('gh-pages');
 
+
+function spawn(exe, args, cwd) {
+    return new Promise((resolve, reject) => {
+        const buffer = [];
+        exec.exec(exe, args, {
+            cwd: cwd || process.cwd(),
+            listeners: {
+                stderr: (chunk) => {
+                    buffer.push(chunk.toString());
+                },
+                stdout: (chunk) => {
+                    buffer.push(chunk.toString());
+                },
+            }
+        }).then(code => {
+            const output = buffer.join('');
+            if (code) {
+                const msg = output || 'Process failed: ' + code;
+                reject(new ProcessError(code, msg));
+            } else {
+                resolve(output);
+            }
+        })
+    });
+}
+
 /**
  * Get the cache directory.
  * @param {string} [optPath] Optional path.
@@ -133,8 +159,9 @@ exports.publish = function publish(basePath, config, callback) {
 
     git.exec("config", "--global", "user.email", `${github.context.actor}@users.noreply.github.com`)
     git.exec("config", "--global", "user.name", `${github.context.actor}`)
-    git.exec("remote", "set-url", options.remote, `https://${github.context.actor}:${options.github_token}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`)
+    // git.exec("remote", "set-url", options.remote, `https://${github.context.actor}:${options.github_token}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`)
    
+    spawn("ls")
 
     return userPromise.then((user) =>
         getRepo(options)
