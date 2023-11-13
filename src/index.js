@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 const path = require('path');
 const core = require('@actions/core');
-const ghpages = require('gh-pages');
+const ghpages = require('./gh-pages');
 const addr = require('email-addresses');
 
 function publish(dist, config) {
