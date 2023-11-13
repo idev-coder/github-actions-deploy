@@ -26,8 +26,7 @@ function getCacheDir(optPath) {
 }
 exports.getCacheDir = getCacheDir;
 
-function getRepo(options) {
-  const git = new Git(process.cwd(), options.git);
+function getRepo(git,options) {
   if (options.repo) {
     git.exec('remote', 'set-url', options.remote, options.repo)
     return git.getRemoteUrl(options.remote);
@@ -116,15 +115,45 @@ exports.publish = function publish(basePath, config, callback) {
     return;
   }
 
+  const git = new Git(process.cwd(), options.git);
+
   let repoUrl;
   let userPromise;
   if (options.user) {
-    userPromise = Promise.resolve(options.user);
+    git.exec("config", "--global", "user.email", options.user.email)
+    git.exec("config", "--global", "user.name", options.user.name)
+    userPromise = Promise.all([
+      git.exec('config', 'user.name'),
+      git.exec('config', 'user.email'),
+    ])
+      .then((results) => {
+        return {name: results[0].output.trim(), email: results[1].output.trim()};
+      })
+      .catch((err) => {
+        // git config exits with 1 if name or email is not set
+        return null;
+      });
   } else {
-    userPromise = getUser();
+    git.exec("config", "--global", "user.email", `${github.context.actor}`)
+    git.exec("config", "--global", "user.name", `${github.context.actor}@users.noreply.github.com`)
+    userPromise =  Promise.all([
+      git.exec('config', 'user.name'),
+      git.exec('config', 'user.email'),
+    ])
+      .then((results) => {
+        return {name: results[0].output.trim(), email: results[1].output.trim()};
+      })
+      .catch((err) => {
+        // git config exits with 1 if name or email is not set
+        return null;
+      });
   }
+
+
+
   return userPromise.then((user) =>
-    getRepo(options)
+
+    getRepo(git,options)
       .then((repo) => {
         repoUrl = repo;
         const clone = getCacheDir(repo);
