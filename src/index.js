@@ -3,33 +3,6 @@ const path = require('path');
 const core = require('@actions/core');
 const ghpages = require('gh-pages');
 const addr = require('email-addresses');
-const github = require('@actions/github');
-const exec = require('@actions/exec');
-
-function spawn(exe, args, cwd) {
-    return new Promise((resolve, reject) => {
-        const buffer = [];
-        exec.exec(exe, args, {
-            cwd: cwd || process.cwd(),
-            listeners: {
-                stderr: (chunk) => {
-                    buffer.push(chunk.toString());
-                },
-                stdout: (chunk) => {
-                    buffer.push(chunk.toString());
-                },
-            }
-        }).then(code => {
-            const output = buffer.join('');
-            if (code) {
-                const msg = output || 'Process failed: ' + code;
-                reject(new ProcessError(code, msg));
-            } else {
-                resolve(output);
-            }
-        })
-    });
-}
 
 function publish(dist, config) {
 
@@ -123,19 +96,6 @@ function main(args) {
         };
 
 
-        if (config.user) {
-            spawn("git", ["config", "--global", "user.email", config.user.email])
-            spawn("git", ["config", "--global", "user.name", config.user.name])
-        }
-
-        if (config.repo) {
-            spawn("git", ["remote", "set-url", config.remote, config.repo])
-        }
-
-        spawn("git", ["config", "--global", "user.email", `${github.context.actor}@users.noreply.github.com`])
-        spawn("git", ["config", "--global", "user.name", `${github.context.actor}`])
-        spawn("git", ["remote", "set-url", config.remote, `https://${github.context.actor}:${config.github_token}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`])
-        spawn("ls")
         return publish(options.dist, config);
     });
 }
