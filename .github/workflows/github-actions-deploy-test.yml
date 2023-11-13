@@ -1,0 +1,30 @@
+# This workflow will run tests using node and then publish a package to GitHub Packages when a release is created
+# For more information see: https://docs.github.com/en/actions/publishing-packages/publishing-nodejs-packages
+
+name: Github Actions Deploy Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Github Actions Deploy
+        uses: idev-coder/github-actions-deploy@v1.0.0
+        with:
+          github_token: ${{secrets.GITHUB_TOKEN}}
+          dist: 'dist'
+          branch: test
+          message: 'Updates Test'
+          dotfiles: true
+          add: true
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  
