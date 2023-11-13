@@ -167,9 +167,7 @@ Git.prototype.add = function (files) {
  * @return {Promise} A promise.
  */
 Git.prototype.commit = function (message) {
-    return this.exec('diff-index', '--quiet', 'HEAD', '.').catch(() =>
-        this.exec('commit', '-m', message)
-    );
+    return  this.exec('commit', '-m', message)
 };
 
 /**
