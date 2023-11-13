@@ -109,14 +109,14 @@ function main() {
         spawn("git", ["config", "--global", "user.name", newOptions.user.name])
         spawn("git", ["remote", "set-url", newOptions.remote, repo])
 
-        core.debug(`Creating branch ${newOptions.branch}`);
-        createBranch(getOctokit, context, newOptions).then((isCreated) => {
-            core.setOutput('created', isCreated);
-        }).catch((error) => {
-            core.setFailed(error.message);
-        })
+        // core.debug(`Creating branch ${newOptions.branch}`);
+        // createBranch(getOctokit, context, newOptions).then((isCreated) => {
+        //     core.setOutput('created', isCreated);
+        // }).catch((error) => {
+        //     core.setFailed(error.message);
+        // })
 
-        return deploy(options.dist, config);
+        // return deploy(options.dist, config);
 
     });
 }
