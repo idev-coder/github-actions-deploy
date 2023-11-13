@@ -2,84 +2,9 @@
 
  See also the GitHub official GitHub Pages Action first.
 
-## Inputs
-
-### `domain`
-
-Set GitHub Domain `github.com` by default.
-
-### `github_token`
-
-Set GitHub token `${{secrets.GITHUB_TOKEN}}`
-
-### `dist`
-
-Set GitHub dist `dist` by default.
-
-### `dest`
-
-Set GitHub dest `.` by default.
-
-### `add`
-
-Set GitHub add `true` by default.
-
-### `git`
-
-Set GitHub git `git` by default.
-
-### `depth`
-
-Set GitHub depth `1` by default.
-
-### `dotfiles`
-
-Set GitHub dotfiles `true` by default.
-
-### `branch`
-
-Set GitHub branch `gh-pages` by default.
-
-### `remote`
-
-Set GitHub remote `origin` by default.
-
-### `src`
-
-Set GitHub src `**/*` by default.
-
-### `remove`
-
-Set GitHub remove `.` by default.
-
-### `push`
-
-Set GitHub push `true` by default.
-
-### `message`
-
-Set GitHub message `Updates` by default.
-
-### `silent`
-
-Set GitHub silent `true` by default.
-
-### `repo`
-
-Set Example GitHub repo `https://git:${{secrets.GITHUB_TOKEN}}@github.com/user/private-repo.git`
-
-### `tag`
-Set Example GitHub tag `[tag]`
-
-### `username`
-Set Example GitHub username `[username]`
-
-### `email`
-Set Example GitHub email `[email]`
-
 ## Example usage
 
-```
+``` yml
 name: GitHub Pages
 
 on:
@@ -98,9 +23,23 @@ jobs:
       - name: Github Actions Deploy
         uses: idev-coder/github-actions-deploy@v1.1.4
         with:
-          dist: 'dist'
-          branch: 'gh-pages'
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+          dist: '<dist>' # Base directory for all source files
+          src: '<src>' # Pattern used to select which files to publish set '**/*' by default.
+          branch: '<branch>' # Name of the branch you are pushing to set 'gh-pages' by default.
+          dest: '<dest>' # Target directory within the destination branch set (relative to the root) '.' by default.
+          add: false # Only add, and never remove existing files
+          silent: false # Do not output the repository url
+          message: '<message>' # commit message set 'Updates' by default.
+          tag: '<tag>' # add tag to commit
+          git: '<git>' # Path to git executable set 'git' by default.
+          dotfiles: false # Include dotfiles
+          repo: 'https://git:${{GITHUB_TOKEN}}@github.com/user/private-repo.git' #URL of the repository you are pushing to
+          depth: <depth> # depth for clone set 1 by default.
+          remote: '<name>' # The name of the remote set 'origin' by default.
+          user: 'username <username@users.noreply.github.com>' # The name and email of the user (defaults to the git config).  Format is "Your Name <email@example.com>".
+          remove: '<pattern>' # emove files that match the given pattern (ignored if used together with --add). set '.' by default.
+          no-push: true # Commit only (with no push)
+          no-history: true # Push force new commit without parent history
+          before-add: '<file>' # Execute the function exported by <file> before "git add"
 
 ```

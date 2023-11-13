@@ -1,9 +1,8 @@
 #!/usr/bin/env node
-
-const ghpages = require('./publish');
 const path = require('path');
 const core = require('@actions/core');
-const github = require('@actions/github');
+const ghpages = require('gh-pages');
+const addr = require('email-addresses');
 
 function publish(dist, config) {
     return new Promise((resolve, reject) => {
@@ -19,36 +18,60 @@ function publish(dist, config) {
 
 function main(args) {
     return Promise.resolve().then(() => {
-        github.getOctokit(core.getInput('github_token') || process.env['GITHUB_TOKEN'])
         const options = {
-            domain: core.getInput('domain') || 'github.com',
-            github_token: core.getInput('github_token') || process.env['GITHUB_TOKEN'],
-            dist: core.getInput('dist') || 'dist',
-            dest: core.getInput('dest') || '.',
-            add: typeof core.getInput('add') == "boolean" ? core.getInput('add') : core.getInput('add') === "true" ? true : false || false,
-            git: core.getInput('git') || 'git',
-            depth: core.getInput('depth') || 1,
-            dotfiles: typeof core.getInput('dotfiles') == "boolean" ? core.getInput('dotfiles') : core.getInput('dotfiles') === "true" ? true : false || false,
-            branch: core.getInput('branch') || 'gh-pages',
-            remote: core.getInput('remote') || 'origin',
-            src: core.getInput('src') || '**/*',
-            remove: core.getInput('remove') || '.',
-            push: typeof core.getInput('push') == "boolean" ? core.getInput('push') : core.getInput('push') === "true" ? true : false || true,
-            history: typeof core.getInput('history') == "boolean" ? core.getInput('history') : core.getInput('history') === "true" ? true : false || true,
-            message: core.getInput('message') || 'Updates',
-            silent: typeof core.getInput('silent') == "boolean" ? core.getInput('silent') : core.getInput('silent') === "true" ? true : false || false,
+            dist: core.getInput('dist'),
+            src: core.getInput('src') || ghpages.defaults.src,
+            branch: core.getInput('branch') || ghpages.defaults.branch,
+            dest: core.getInput('dest') || ghpages.defaults.dest,
+            add: core.getInput('add'),
+            silent: core.getInput('silent'),
+            message: core.getInput('message') || ghpages.defaults.message,
+            tag: core.getInput('tag'),
+            git: core.getInput('git') || ghpages.defaults.git,
+            dotfiles: core.getInput('dotfiles'),
             repo: core.getInput('repo'),
-            user: {
-                name: core.getInput('username'),
-                email: core.getInput('email')
-            }
+            depth: core.getInput('depth') || ghpages.defaults.depth,
+            remote: core.getInput('remote') || ghpages.defaults.remote,
+            user: core.getInput('user'),
+            remove: core.getInput('remove') || ghpages.defaults.remove,
+            push: core.getInput('no-push'),
+            history: core.getInput('no-history'),
+            beforeAdd: core.getInput('before-add')
 
         }
 
 
+        let user;
+        if (options.user) {
+            const parts = addr.parseOneAddress(options.user);
+            if (!parts) {
+                throw new Error(
+                    `Could not parse name and email from user option "${options.user}" ` +
+                    '(format should be "Your Name <email@example.com>")'
+                );
+            }
+            user = { name: parts.name, email: parts.address };
+        }
+        let beforeAdd;
+        if (options.beforeAdd) {
+            const m = require(require.resolve(options.beforeAdd, {
+                paths: [process.cwd()],
+            }));
+
+            if (typeof m === 'function') {
+                beforeAdd = m;
+            } else if (typeof m === 'object' && typeof m.default === 'function') {
+                beforeAdd = m.default;
+            } else {
+                throw new Error(
+                    `Could not find function to execute before adding files in ` +
+                    `"${options.beforeAdd}".\n `
+                );
+            }
+        }
+
+
         const config = {
-            github_token: options.github_token,
-            domain: options.domain,
             repo: options.repo,
             silent: !!options.silent,
             branch: options.branch,
@@ -64,7 +87,8 @@ function main(args) {
             remote: options.remote,
             push: !!options.push,
             history: !!options.history,
-            user: options.user
+            user: user,
+            beforeAdd: beforeAdd,
         };
 
         return publish(options.dist, config);

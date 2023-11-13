@@ -6,80 +6,59 @@ branding:
   color: 'yellow'
 
 inputs:
-  domain:
-    description: 'GitHub domain'
-    required: false
-    default: 'github.com'
-  github_token:
-    description: 'GitHub token'
-    required: false
   dist:
-    description: 'GitHub dist'
+    description: 'Base directory for all source files'
     required: false
-    default: 'dist'
-  dest:
-    description: 'GitHub dest'
-    required: false
-    default: '.'
-  add:
-    description: 'GitHub add'
-    required: false
-    default: 'false'
-  git:
-    description: 'GitHub git'
-    required: false
-    default: 'git'
-  depth:
-    description: 'GitHub depth'
-    required: false
-    default: 1
-  dotfiles:
-    description: 'GitHub dotfiles'
-    required: false
-    default: 'false'
-  branch:
-    description: 'GitHub branch'
-    required: false
-    default: 'gh-pages'
-  remote:
-    description: 'GitHub remote'
-    required: false
-    default: 'origin'
   src:
-    description: 'GitHub src'
+    description: 'Pattern used to select which files to publish'
     required: false
-    default: '**/*'
-  remove:
-    description: 'GitHub remove'
+  branch:
+    description: 'Name of the branch you are pushing to'
     required: false
-    default: '.'
-  push:
-    description: 'GitHub push'
+  dest:
+    description: 'Target directory within the destination branch (relative to the root)'
     required: false
-    default: 'true'
-  history:
-    description: 'GitHub history'
+  add:
+    description: 'Only add, and never remove existing files'
     required: false
-    default: 'true'
-  message:
-    description: 'GitHub message'
-    required: false
-    default: 'Updates'
   silent:
-    description: 'GitHub silent'
+    description: 'Do not output the repository url'
     required: false
-    default: 'false'
-  repo:
-    description: 'GitHub repo'
+  message:
+    description: 'commit message'
     required: false
   tag:
-    description: 'GitHub tag'
+    description: 'add tag to commit'
     required: false
-  username:
-    description: 'GitHub username'
+  git:
+    description: 'Path to git executable'
     required: false
-  email:
-    description: 'GitHub email'
+  dotfiles:
+    description: 'Include dotfiles'
+    required: false
+  repo:
+    description: 'URL of the repository you are pushing to'
+    required: false
+  depth:
+    description: 'depth for clone'
+    required: false
+  remote:
+    description: 'The name of the remote'
+    required: false
+  user:
+    description: 'The name and email of the user (defaults to the git config).  Format is "Your Name <email@example.com>".'
+    required: false
+  remove:
+    description: 'Remove files that match the given pattern (ignored if used together with --add).'
+    required: false
+  no-push:
+    description: 'Commit only (with no push)'
+    required: false
+  no-history:
+    description: 'Push force new commit without parent history'
+    required: false
+  before-add:
+    description: 'Execute the function exported by <file> before "git add"'
     required: false
 runs:
   using: 'node16'
