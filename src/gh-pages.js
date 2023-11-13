@@ -7,6 +7,7 @@ const fs = require('fs-extra');
 const globby = require('globby');
 const path = require('path');
 const util = require('util');
+const github = require('@actions/github');
 
 const log = util.debuglog('gh-pages');
 
