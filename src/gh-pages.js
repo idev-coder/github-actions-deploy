@@ -7,6 +7,7 @@ const fs = require('fs-extra');
 const globby = require('globby');
 const path = require('path');
 const util = require('util');
+const github = require('@actions/github');
 
 const log = util.debuglog('gh-pages');
 
@@ -16,7 +17,7 @@ const log = util.debuglog('gh-pages');
  * @return {string} The full path to the cache directory.
  */
 function getCacheDir(optPath) {
-  const dir = findCacheDir({name: 'gh-pages'});
+  const dir = findCacheDir({ name: 'gh-pages' });
   if (!optPath) {
     return dir;
   }
@@ -26,10 +27,12 @@ function getCacheDir(optPath) {
 exports.getCacheDir = getCacheDir;
 
 function getRepo(options) {
+  const git = new Git(process.cwd(), options.git);
   if (options.repo) {
-    return Promise.resolve(options.repo);
+    git.exec('remote', 'set-url', options.remote, options.repo)
+    return git.getRemoteUrl(options.remote);
   } else {
-    const git = new Git(process.cwd(), options.git);
+    git.exec('remote', 'set-url', options.remote, `https://git:${options.github_token || process.env.GITHUB_TOKEN}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`)
     return git.getRemoteUrl(options.remote);
   }
 }
