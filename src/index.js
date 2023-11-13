@@ -8,20 +8,17 @@ const github = require('@actions/github');
 function publish(dist, config) {
     return new Promise((resolve, reject) => {
         const basePath = path.resolve(process.cwd(), dist);
-        ghpages.publish(basePath, config).then(res => {
-            resolve(res);
-
-        }).catch((err) => {
+        ghpages.publish(basePath, config, (err) => {
             if (err) {
                 return reject(err);
             }
-
+            resolve();
         });
     });
 }
 
 function main(args) {
-    github.getOctokit(core.getInput('github_token') || process.env.GITHUB_TOKEN)
+    github.getOctokit(core.getInput('github_token')|| process.env.GITHUB_TOKEN)
     return Promise.resolve().then(() => {
         const options = {
             dist: core.getInput('dist'),
@@ -101,8 +98,7 @@ function main(args) {
 }
 
 main(process.argv)
-    .then((git) => {
-        process.stdout.write(git);
+    .then(() => {
         process.stdout.write('Published\n');
     })
     .catch((err) => {

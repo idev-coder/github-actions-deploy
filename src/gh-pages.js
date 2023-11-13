@@ -81,11 +81,11 @@ exports.publish = function publish(basePath, config, callback) {
     };
   }
 
-  function done(git) {
+  function done(err) {
     try {
-      callback(git);
-    } catch (err) {
-      log('Publish callback threw: %s', err.message);
+      callback(err);
+    } catch (err2) {
+      log('Publish callback threw: %s', err2.message);
     }
   }
 
@@ -129,6 +129,7 @@ exports.publish = function publish(basePath, config, callback) {
         repoUrl = repo;
         const clone = getCacheDir(repo);
         log('Cloning %s into %s', repo, clone);
+        process.stdout.write('Cloning %s into %s', repo, clone);
         return Git.clone(repo, clone, options.branch, options);
       })
       .then((git) => {
@@ -151,14 +152,17 @@ exports.publish = function publish(basePath, config, callback) {
       .then((git) => {
         // only required if someone mucks with the checkout between builds
         log('Cleaning');
+        process.stdout.write('Cleaning');
         return git.clean();
       })
       .then((git) => {
         log('Fetching %s', options.remote);
+        process.stdout.write('Fetching %s', options.remote);
         return git.fetch(options.remote);
       })
       .then((git) => {
         log('Checking out %s/%s ', options.remote, options.branch);
+        process.stdout.write('Checking out %s/%s ', options.remote, options.branch);
         return git.checkout(options.remote, options.branch);
       })
       .then((git) => {
@@ -174,6 +178,7 @@ exports.publish = function publish(basePath, config, callback) {
         }
 
         log('Removing files');
+        process.stdout.write('Removing files');
         const files = globby
           .sync(options.remove, {
             cwd: path.join(git.cwd, options.dest),
@@ -187,6 +192,7 @@ exports.publish = function publish(basePath, config, callback) {
       })
       .then((git) => {
         log('Copying files');
+        process.stdout.write('Copying files => ', files, basePath, path.join(git.cwd, options.dest));
         return copy(files, basePath, path.join(git.cwd, options.dest)).then(
           function () {
             return git;
@@ -200,6 +206,7 @@ exports.publish = function publish(basePath, config, callback) {
       })
       .then((git) => {
         log('Adding all');
+        process.stdout.write('Adding all');
         return git.add('.');
       })
       .then((git) => {
@@ -215,11 +222,13 @@ exports.publish = function publish(basePath, config, callback) {
       })
       .then((git) => {
         log('Committing');
+        process.stdout.write('Committing => ', options.message)
         return git.commit(options.message);
       })
       .then((git) => {
         if (options.tag) {
           log('Tagging');
+          process.stdout.write('Tagging => ', options.tag)
           return git.tag(options.tag).catch((error) => {
             // tagging failed probably because this tag alredy exists
             log(error);
@@ -233,13 +242,14 @@ exports.publish = function publish(basePath, config, callback) {
       .then((git) => {
         if (options.push) {
           log('Pushing');
+          process.stdout.write('Pushing => ', options.remote, options.branch, !options.history)
           return git.push(options.remote, options.branch, !options.history);
         } else {
           return git;
         }
       })
       .then(
-        (git) => done(git),
+        () => done(),
         (error) => {
           if (options.silent) {
             error = new Error(
