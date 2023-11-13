@@ -23,8 +23,6 @@ jobs:
           dist: 'dist'
           branch: test
           message: 'Updates Test'
-          dotfiles: true
-          add: true
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
   

@@ -115,7 +115,7 @@ function main() {
             core.setFailed(error.message);
         })
 
-        return deploy(options.dist, config);
+        // return deploy(options.dist, config);
 
     });
 }
