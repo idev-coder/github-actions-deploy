@@ -250,8 +250,7 @@ Git.clone = function clone(repo, dir, branch, options) {
             return fs.mkdirp(path.dirname(path.resolve(dir))).then(() => {
                 const args = [
                     'clone',
-                    '--depth',
-                    options.depth,
+                    `--depth=${options.depth}`,
                     '--single-branch',
                     '--branch',
                     branch,
