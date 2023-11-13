@@ -8,6 +8,7 @@ const globby = require('globby');
 const path = require('path');
 const util = require('util');
 const github = require('@actions/github');
+const exec = require('@actions/exec');
 
 const log = util.debuglog('gh-pages');
 
