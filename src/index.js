@@ -1,14 +1,16 @@
 #!/usr/bin/env node
 const path = require('path');
 const core = require('@actions/core');
-const ghpages = require('./gh-pages');
 const addr = require('email-addresses');
+const github = require('@actions/github');
+const { publish, defaults } = require('./publish');
+const { spawn } = require('./spawn')
+const { createBranch } = require('./create-branch')
 
-function publish(dist, config) {
-
+function deploy(dist, config) {
     return new Promise((resolve, reject) => {
         const basePath = path.resolve(process.cwd(), dist);
-        ghpages.publish(basePath, config, (err) => {
+        publish(basePath, config, (err) => {
             if (err) {
                 return reject(err);
             }
@@ -17,26 +19,25 @@ function publish(dist, config) {
     });
 }
 
-function main(args) {
-    // github.getOctokit(core.getInput('github_token')|| process.env.GITHUB_TOKEN)
+function main() {
     return Promise.resolve().then(() => {
         const options = {
             github_token: core.getInput('github_token') || process.env.GITHUB_TOKEN,
             dist: core.getInput('dist'),
-            src: core.getInput('src') || ghpages.defaults.src,
-            branch: core.getInput('branch') || ghpages.defaults.branch,
-            dest: core.getInput('dest') || ghpages.defaults.dest,
+            src: core.getInput('src') || defaults.src,
+            branch: core.getInput('branch') || defaults.branch,
+            dest: core.getInput('dest') || defaults.dest,
             add: core.getInput('add'),
             silent: core.getInput('silent'),
-            message: core.getInput('message') || ghpages.defaults.message,
+            message: core.getInput('message') || defaults.message,
             tag: core.getInput('tag'),
-            git: core.getInput('git') || ghpages.defaults.git,
+            git: core.getInput('git') || defaults.git,
             dotfiles: core.getInput('dotfiles'),
             repo: core.getInput('repo'),
-            depth: core.getInput('depth') || ghpages.defaults.depth,
-            remote: core.getInput('remote') || ghpages.defaults.remote,
+            depth: core.getInput('depth') || defaults.depth,
+            remote: core.getInput('remote') || defaults.remote,
             user: core.getInput('user'),
-            remove: core.getInput('remove') || ghpages.defaults.remove,
+            remove: core.getInput('remove') || defaults.remove,
             push: core.getInput('no-push'),
             history: core.getInput('no-history'),
             beforeAdd: core.getInput('before-add')
@@ -91,16 +92,35 @@ function main(args) {
             remote: options.remote,
             push: !!options.push,
             history: !!options.history,
-            user: user,
+            user: {
+                name: user.name ? user.name : `${github.context.actor}`,
+                email: user.email ? user.email : `${github.context.actor}@users.noreply.github.com`
+            },
             beforeAdd: beforeAdd,
         };
 
+        const newOptions = Object.assign({}, defaults, config);
 
-        return publish(options.dist, config);
+        const repo = newOptions.repo ? newOptions.repo : `https://${github.context.actor}:${newOptions.github_token}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`
+
+
+        spawn("git", ["config", "--global", "user.email", newOptions.user.email])
+        spawn("git", ["config", "--global", "user.name", newOptions.user.name])
+        spawn("git", ["remote", "set-url", newOptions.remote, repo])
+
+        core.debug(`Creating branch ${newOptions.branch}`);
+        createBranch(github.getOctokit, github.context, newOptions).then((isCreated) => {
+            core.setOutput('created', Boolean(isCreated));
+        }).catch((error) => {
+            core.setFailed(error.message);
+        })
+
+        return deploy(options.dist, config);
+
     });
 }
 
-main(process.argv)
+main()
     .then(() => {
         process.stdout.write('Published\n');
     })

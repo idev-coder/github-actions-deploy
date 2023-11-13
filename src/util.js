@@ -1,5 +1,5 @@
 const path = require('path');
-const Git = require('./git.js');
+const Git = require('./git');
 const async = require('async');
 const fs = require('fs-extra');
 

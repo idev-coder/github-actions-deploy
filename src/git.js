@@ -2,7 +2,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 const util = require('util');
-const exec = require('@actions/exec');
+const { spawn } = require('./spawn')
 
 /**
  * @function Object() { [native code] }
@@ -19,37 +19,6 @@ function ProcessError(code, message) {
 }
 util.inherits(ProcessError, Error);
 
-/**
- * Util function for handling spawned processes as promises.
- * @param {string} exe Executable.
- * @param {Array<string>} args Arguments.
- * @param {string} cwd Working directory.
- * @return {Promise} A promise.
- */
-function spawn(exe, args, cwd) {
-    return new Promise((resolve, reject) => {
-        const buffer = [];
-        exec.exec(exe, args, {
-            cwd: cwd || process.cwd(),
-            listeners: {
-                stderr: (chunk) => {
-                    buffer.push(chunk.toString());
-                },
-                stdout: (chunk) => {
-                    buffer.push(chunk.toString());
-                },
-            }
-        }).then(code => {
-            const output = buffer.join('');
-            if (code) {
-                const msg = output || 'Process failed: ' + code;
-                reject(new ProcessError(code, msg));
-            } else {
-                resolve(output);
-            }
-        })
-    });
-}
 /**
  * Create an object for executing git commands.
  * @param {string} cwd Repository directory.
@@ -216,12 +185,12 @@ Git.prototype.getRemoteUrl = function (remote) {
     .catch((err) => {
       throw new Error(
         'Failed to get remote.' +
-          remote +
-          '.url (task must either be ' +
-          'run in a git repository with a configured ' +
-          remote +
-          ' remote ' +
-          'or must be configured with the "repo" option).'
+        remote +
+        '.url (task must either be ' +
+        'run in a git repository with a configured ' +
+        remote +
+        ' remote ' +
+        'or must be configured with the "repo" option).'
       );
     });
 };
