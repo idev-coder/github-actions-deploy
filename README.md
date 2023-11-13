@@ -66,7 +66,7 @@ Set GitHub silent `true` by default.
 
 ### `repo`
 
-Set Example GitHub repo `https://x-access-token:${{secrets.GITHUB_TOKEN}}@github.com/user/private-repo.git`
+Set Example GitHub repo `https://git:${{secrets.GITHUB_TOKEN}}@github.com/user/private-repo.git`
 
 ### `tag`
 Set Example GitHub tag `[tag]`

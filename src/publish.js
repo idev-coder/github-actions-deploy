@@ -125,7 +125,6 @@ exports.publish = function publish(basePath, config, callback) {
                 repoUrl = repo;
                 const clone = getCacheDir(repo);
                 log('Cloning %s into %s', repo, clone);
-                console.log('Cloning %s into %s', repo, clone);
                 return Git.clone(repo, clone, options.branch, options);
             })
             .then((git) => {

@@ -225,11 +225,10 @@ Git.prototype.getRemoteUrl = function (remote) {
 };
 
 Git.prototype.setRemoteUrl = function (options) {
-    let remoteURL = `https://x-access-token:${options.github_token}@${options.domain}/${github.context.repo.owner}/${github.context.repo.repo}.git`
+    let remoteURL = options.repo ? options.repo : `https://git:${options.github_token}@${options.domain}/${github.context.repo.owner}/${github.context.repo.repo}.git`
 
     return this.exec('remote', 'set-url', options.remote, remoteURL).then((git) => {
-        // console.log(git);
-        const repo = options.repo ? options.repo : remoteURL
+        const repo = remoteURL
         if (repo) {
             return repo;
         } else {
