@@ -3,10 +3,10 @@ const path = require('path');
 const core = require('@actions/core');
 const addr = require('email-addresses');
 const github = require('@actions/github');
-const { getOctokit, context } = require('@actions/github');
+// const { getOctokit, context } = require('@actions/github');
 const { publish, defaults } = require('./publish');
-const { spawn } = require('./spawn')
-const { createBranch } = require('./create-branch')
+// const { spawn } = require('./spawn')
+// const { createBranch } = require('./create-branch')
 
 function deploy(dist, config) {
     return new Promise((resolve, reject) => {
@@ -102,12 +102,12 @@ function main() {
 
         const newOptions = Object.assign({}, defaults, config);
 
-        const repo = newOptions.repo ? newOptions.repo : `https://${github.context.actor}:${newOptions.github_token}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`
+        // const repo = newOptions.repo ? newOptions.repo : `https://${github.context.actor}:${newOptions.github_token}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`
+        core.debug(`newOptions => ${newOptions}`);
 
-
-        spawn("git", ["config", "--global", "user.email", newOptions.user.email])
-        spawn("git", ["config", "--global", "user.name", newOptions.user.name])
-        spawn("git", ["remote", "set-url", newOptions.remote, repo])
+        // spawn("git", ["config", "--global", "user.email", newOptions.user.email])
+        // spawn("git", ["config", "--global", "user.name", newOptions.user.name])
+        // spawn("git", ["remote", "set-url", newOptions.remote, repo])
 
         // core.debug(`Creating branch ${newOptions.branch}`);
         // createBranch(getOctokit, context, newOptions).then((isCreated) => {
