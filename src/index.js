@@ -103,7 +103,7 @@ function main() {
         const newOptions = Object.assign({}, defaults, config);
 
         // const repo = newOptions.repo ? newOptions.repo : `https://${github.context.actor}:${newOptions.github_token}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`
-        core.debug(`newOptions => ${newOptions}`);
+        core.info(`newOptions => ${newOptions}`);
 
         // spawn("git", ["config", "--global", "user.email", newOptions.user.email])
         // spawn("git", ["config", "--global", "user.name", newOptions.user.name])
@@ -122,9 +122,9 @@ function main() {
 }
 
 main()
-    .then(() => {
-        process.stdout.write('Published\n');
-    })
-    .catch((err) => {
-        process.stderr.write(`${err.stack}\n`, () => process.exit(1));
-    });
+    // .then(() => {
+    //     process.stdout.write('Published\n');
+    // })
+    // .catch((err) => {
+    //     process.stderr.write(`${err.stack}\n`, () => process.exit(1));
+    // });
