@@ -110,7 +110,7 @@ function main() {
                 if (output) {
                     core.info(`---------- update branch -----------`);
                     core.info(`${output.trim()}`);
-                    spawn('git', ['pull', `${newOptions.remote}`, `${newOptions.branch}`])
+                    spawn('git', ['pull', `${newOptions.remote}`])
                     spawn('rm', ['-rf', `!(${newOptions.dist})`])
                     spawn('cp', ['-r', `${newOptions.dist}/.`, './'])
                     spawn('rm', ['-r', `${newOptions.dist}`])
