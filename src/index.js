@@ -113,7 +113,7 @@ function main() {
                     spawn('git', ['rm', '-rf', `.`])
                     spawn('git', ['restore', '--staged', `${newOptions.dist}/*`, '.gitignore'])
                     spawn('git', ['checkout', '--', `${newOptions.dist}/*`, '.gitignore'])
-                    spawn('cp', ['-r', `${newOptions.dist}/*`, './'])
+                    spawn('cp', ['-r', `${newOptions.dist}/.`, './'])
                     spawn('git', ['rm', '-rf', `${newOptions.dist}`])
                     spawn('git', ['status', '--porcelain']).then((output) => {
                         if (!output) {
@@ -133,7 +133,7 @@ function main() {
                     spawn('git', ['rm', '-rf', `.`])
                     spawn('git', ['restore', '--staged', `${newOptions.dist}/*`, '.gitignore'])
                     spawn('git', ['checkout', '--', `${newOptions.dist}/*`, '.gitignore'])
-                    spawn('cp', ['-r', `${newOptions.dist}/*`, './'])
+                    spawn('cp', ['-r', `${newOptions.dist}/.`, './'])
                     spawn('git', ['rm', '-rf', `${newOptions.dist}`])
                     spawn('git', ['status', '--porcelain']).then((output) => {
                         if (!output) {
