@@ -111,8 +111,7 @@ function main() {
                                 if (output.trim().includes(newOptions.branch)) {
                                     core.info(`---------- update branch -----------`);
                                     core.info(`branch:${newOptions.branch}`);
-                                    // spawn('git', ['pull', `${newOptions.remote}`, `${newOptions.branch}`]).then((output) => {
-                                    core.info(`----------- Pull Successful -----------`);
+
                                     core.info(`info => ${output.trim()}`);
                                     spawn('git', ['rm', '-rf', `.`]).then(() => {
                                         spawn('git', ['restore', '--staged', `${newOptions.dist}/*`, '.gitignore']).then(() => {
@@ -125,12 +124,17 @@ function main() {
                                                             } else {
                                                                 spawn('git', ['add', '.']).then(() => {
                                                                     spawn('git', ['commit', '-m', newOptions.message ? newOptions.message : `Deploying ${newOptions.branch} from ${originBranch}`]).then(() => {
-                                                                        spawn('git', ['push', `${newOptions.remote}`, `${newOptions.branch}`]).then(() => {
-                                                                            core.info(`---------- deploy successful -----------`);
+                                                                        spawn('git', ['rebase', `${newOptions.branch}`]).then(() => {
+                                                                            spawn('git', ['pull', `${newOptions.remote}`, `${newOptions.branch}`]).then(() => {
+                                                                                core.info(`----------- Pull Successful -----------`);
+                                                                                spawn('git', ['push', `${newOptions.remote}`, `${newOptions.branch}`]).then(() => {
+                                                                                    core.info(`---------- deploy successful -----------`);
+                                                                                })
+
+                                                                            })
                                                                         })
 
                                                                     })
-
                                                                 })
 
                                                             }
@@ -144,9 +148,7 @@ function main() {
                                         })
 
                                     })
-                                    // }).catch((err) => {
-                                    //     core.info(`Pull Error`);
-                                    // })
+
 
 
 
