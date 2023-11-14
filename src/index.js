@@ -114,8 +114,8 @@ function main() {
 
                                     core.info(`info => ${output.trim()}`);
                                     spawn('git', ['rm', '-rf', `.`]).then(() => {
-                                        spawn('git', ['restore', '--staged', `${newOptions.dist}/*`, '.gitignore', '.github/*']).then(() => {
-                                            spawn('git', ['checkout', '--', `${newOptions.dist}/*`, '.gitignore', '.github/*']).then(() => {
+                                        spawn('git', ['restore', '--staged', `${newOptions.dist}/*`, '.github/*']).then(() => {
+                                            spawn('git', ['checkout', '--', `${newOptions.dist}/*`, '.github/*']).then(() => {
                                                 spawn('cp', ['-r', `${newOptions.dist}/.`, './']).then(() => {
                                                     spawn('git', ['rm', '-rf', `${newOptions.dist}`]).then(() => {
                                                         spawn('git', ['status', '--porcelain']).then((output) => {
@@ -151,8 +151,8 @@ function main() {
                                     core.info(`---------- new branch -----------`);
                                     core.info(`branch:${newOptions.branch}`);
                                     spawn('git', ['rm', '-rf', `.`]).then(() => {
-                                        spawn('git', ['restore', '--staged', `${newOptions.dist}/*`, '.gitignore', '.github/*']).then(() => {
-                                            spawn('git', ['checkout', '--', `${newOptions.dist}/*`, '.gitignore', '.github/*']).then(() => {
+                                        spawn('git', ['restore', '--staged', `${newOptions.dist}/*`, '.github/*']).then(() => {
+                                            spawn('git', ['checkout', '--', `${newOptions.dist}/*`, '.github/*']).then(() => {
                                                 spawn('cp', ['-r', `${newOptions.dist}/.`, './']).then(() => {
                                                     spawn('git', ['rm', '-rf', `${newOptions.dist}`]).then(() => {
                                                         spawn('git', ['status', '--porcelain']).then((output) => {
