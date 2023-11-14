@@ -1,150 +1,125 @@
 #!/usr/bin/env node
-const path = require('path');
-const core = require('@actions/core');
-const addr = require('email-addresses');
-const github = require('@actions/github');
-const { getOctokit, context } = require('@actions/github');
-const { publish, defaults } = require('./publish');
-const { spawn } = require('./spawn')
-const { createBranch } = require('./create-branch')
 
-function deploy(dist, config) {
+const core = require('@actions/core');
+const exec = require('@actions/exec');
+const github = require('@actions/github');
+const addr = require('email-addresses');
+
+const spawn = (exe, args, cwd) => {
     return new Promise((resolve, reject) => {
-        const basePath = path.resolve(process.cwd(), dist);
-        publish(basePath, config, (err) => {
-            if (err) {
-                return reject(err);
+        const buffer = [];
+        exec.exec(exe, args, {
+            cwd: cwd || process.cwd(),
+            listeners: {
+                stderr: (chunk) => {
+                    buffer.push(chunk.toString());
+                },
+                stdout: (chunk) => {
+                    buffer.push(chunk.toString());
+                },
             }
-            resolve();
-        });
+        }).then(code => {
+            const output = buffer.join('');
+            if (code) {
+                const msg = output || 'Process failed: ' + code;
+                reject(new ProcessError(code, msg));
+            } else {
+                resolve(output);
+            }
+        })
     });
 }
 
 function main() {
-    return Promise.resolve().then(() => {
-        const options = {
-            github_token: core.getInput('github_token') || process.env.GITHUB_TOKEN,
-            dist: core.getInput('dist'),
-            src: core.getInput('src') || defaults.src,
-            branch: core.getInput('branch') || defaults.branch,
-            dest: core.getInput('dest') || defaults.dest,
-            add: core.getInput('add'),
-            silent: core.getInput('silent'),
-            message: core.getInput('message') || defaults.message,
-            tag: core.getInput('tag'),
-            git: core.getInput('git') || defaults.git,
-            dotfiles: core.getInput('dotfiles'),
-            repo: core.getInput('repo'),
-            depth: core.getInput('depth') || defaults.depth,
-            remote: core.getInput('remote') || defaults.remote,
-            user: core.getInput('user'),
-            remove: core.getInput('remove') || defaults.remove,
-            push: core.getInput('no-push'),
-            history: core.getInput('no-history'),
-            beforeAdd: core.getInput('before-add')
+    const defaults = {
+        branch: 'gh-pages',
+        remote: 'origin'
+    };
 
+    const options = {
+        github_token: core.getInput('github_token') || process.env.GITHUB_TOKEN,
+        dist: core.getInput('dist'),
+        branch: core.getInput('branch') || defaults.branch,
+        message: core.getInput('message'),
+        repo: core.getInput('repo'),
+        remote: core.getInput('remote') || defaults.remote,
+        user: core.getInput('user'),
+    }
+
+
+    let user;
+    if (options.user) {
+        const parts = addr.parseOneAddress(options.user);
+        if (!parts) {
+            throw new Error(
+                `Could not parse name and email from user option '${options.user}' ` +
+                '(format should be "Your Name <email@example.com>")'
+            );
         }
-
-
-        let user;
-        if (options.user) {
-            const parts = addr.parseOneAddress(options.user);
-            if (!parts) {
-                throw new Error(
-                    `Could not parse name and email from user option "${options.user}" ` +
-                    '(format should be "Your Name <email@example.com>")'
-                );
-            }
-            user = { name: parts.name, email: parts.address };
-        }
-        let beforeAdd;
-        if (options.beforeAdd) {
-            const m = require(require.resolve(options.beforeAdd, {
-                paths: [process.cwd()],
-            }));
-
-            if (typeof m === 'function') {
-                beforeAdd = m;
-            } else if (typeof m === 'object' && typeof m.default === 'function') {
-                beforeAdd = m.default;
-            } else {
-                throw new Error(
-                    `Could not find function to execute before adding files in ` +
-                    `"${options.beforeAdd}".\n `
-                );
-            }
-        }
-
-
-        const config = {
-            github_token: options.github_token,
-            repo: options.repo,
-            silent: !!options.silent,
-            branch: options.branch,
-            src: options.src,
-            dest: options.dest,
-            message: options.message,
-            tag: options.tag,
-            git: options.git,
-            depth: options.depth,
-            dotfiles: !!options.dotfiles,
-            add: !!options.add,
-            remove: options.remove,
-            remote: options.remote,
-            push: !!options.push,
-            history: !!options.history,
-            user: user ? user : {
-                name: `${github.context.repo.owner}`,
-                email: `${github.context.repo.owner}@users.noreply.github.com`
-            },
-            beforeAdd: beforeAdd,
-        };
+        user = { name: parts.name, email: parts.address };
+    }
 
 
 
-        const newOptions = Object.assign({}, defaults, config);
+    const config = {
+        github_token: options.github_token,
+        dist: options.dist,
+        repo: options.repo,
+        branch: options.branch,
+        message: options.message,
+        remote: options.remote,
+        user: user ? user : {
+            name: `${github.context.repo.owner}`,
+            email: `${github.context.repo.owner}@users.noreply.github.com`
+        },
+    };
 
-        const repo = newOptions.repo ? newOptions.repo : `https://${github.context.repo.owner}:${newOptions.github_token}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`
-       
 
-        spawn("git", ["config", "--global", "user.name", newOptions.user.name])
-        spawn('git', ['config', 'user.name']).then(output => {
-            core.info(`--- Github Config Username ---`);
-            core.info(`name: ${output.trim()}`);
+
+    const newOptions = Object.assign({}, defaults, config);
+
+    const repo = newOptions.repo ? newOptions.repo : `https://${github.context.repo.owner}:${newOptions.github_token}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`
+
+
+    spawn('git', ['config', '--global', 'user.name', newOptions.user.name])
+    spawn('git', ['config', 'user.name']).then(output => {
+        core.info(`---------- config username -----------`);
+        core.info(`name: ${output.trim()}`);
+    })
+
+    spawn('git', ['config', '--global', 'user.email', newOptions.user.email])
+    spawn('git', ['config', 'user.email']).then(output => {
+        core.info(`---------- config email -----------`);
+        core.info(`email: ${output.trim()}`);
+    })
+
+    spawn('git', ['remote', 'set-url', newOptions.remote, repo])
+    spawn('git', ['config', '--get', 'remote.' + newOptions.remote + '.url']).then(output => {
+        core.info(`---------- set url repo -----------`);
+        const repo = output && output.split(/[\n\r]/).shift();
+        core.info(`url-repo: ${repo}`);
+    })
+    spawn('git', ['rev-parse', '--abbrev-ref', 'HEAD']).then(originBranch => {
+        core.info(`---------- check base branch -----------`);
+        core.info(`branch: ${originBranch.trim()}`);
+
+        spawn('git', ['checkout', '-b', `${newOptions.branch}`]).then(output => {
+            core.info(`---------- new branch -----------`);
+            core.info(`${output.trim()}`);
+            spawn('rm', ['-rf', `!(${newOptions.dist})`])
+            spawn('cp', ['-r', `${newOptions.dist}/.`, './'])
+            spawn('rm', ['-r', `${newOptions.dist}`])
+            spawn('git', ['add', '.'])
+            spawn('git', ['commit', '-m', newOptions.message ? newOptions.message : `Deploying ${newOptions.branch} from ${originBranch}`])
+            spawn('git', ['push', `${newOptions.remote}`, `${newOptions.branch}`])
+            spawn('git', ['checkout', '-b', `${originBranch}`]).then((output) => {
+                core.info(`---------- deploy successful -----------`);
+            })
+
         })
 
-        spawn("git", ["config", "--global", "user.email", newOptions.user.email])
-        spawn('git', ['config', 'user.email']).then(output => {
-            core.info(`--- Github Config Email ---`);
-            core.info(`email: ${output.trim()}`);
-        })
-
-        spawn("git", ["remote", "set-url", newOptions.remote, repo])
-        spawn("git", ["config", "--get", 'remote.' + newOptions.remote + '.url']).then(output => {
-            core.info(`--- Github Remote Chenge Repo ---`);
-            const repo = output && output.split(/[\n\r]/).shift();
-            core.info(repo);
-        })
-        spawn("git", ["rev-parse", "--abbrev-ref", "HEAD"]).then(output => {
-            core.info(`--- Github Get Branch Original ---`);
-            core.info(`branch: ${output.trim()}`);
-        })
-        // core.info(`Original branch ${newOptions.branch}`);
-        
-        spawn("git", ["checkout ", "-b", newOptions.branch]).then(output => {
-            core.info(`--- Github New Branch ---`);
-            core.info(`branch: ${output.trim()}`);
-        })
-
-        // return deploy(options.dist, config);
-
-    });
+    })
 }
 
 main()
-// .then(() => {
-//     process.stdout.write('Published\n');
-// })
-// .catch((err) => {
-//     process.stderr.write(`${err.stack}\n`, () => process.exit(1));
-// });
+

@@ -24,10 +24,8 @@ jobs:
         uses: ./
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
-          dist: 'dist'
+          dist: dist
           branch: test
-          message: 'Updates Test'
-      - run: ls
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
   
