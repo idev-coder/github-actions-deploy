@@ -78,7 +78,7 @@ function main() {
 
     const newOptions = Object.assign({}, defaults, config);
 
-    const repo = newOptions.repo ? newOptions.repo : `https://${newOptions.github_token}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`
+    const repo = newOptions.repo ? newOptions.repo : `https://git:${newOptions.github_token}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`
 
 
     spawn('git', ['config', '--global', 'user.name', newOptions.user.name]).then(() => {
@@ -124,15 +124,10 @@ function main() {
                                                             } else {
                                                                 spawn('git', ['add', '.']).then(() => {
                                                                     spawn('git', ['commit', '-m', newOptions.message ? newOptions.message : `Deploying ${newOptions.branch} from ${originBranch}`]).then(() => {
-                                                                        // spawn('git', ['rebase', `${newOptions.branch}`]).then(() => {
-                                                                            spawn('git', ['pull', `${newOptions.remote}`, `${newOptions.branch}`]).then(() => {
-                                                                                core.info(`----------- Pull Successful -----------`);
-                                                                                spawn('git', ['push', `${newOptions.remote}`, `${newOptions.branch}`]).then(() => {
-                                                                                    core.info(`---------- deploy successful -----------`);
-                                                                                })
-
-                                                                            })
-                                                                        // })
+                                                                        core.info(`----------- Pull Successful -----------`);
+                                                                        spawn('git', ['push', `${newOptions.remote}`, `${newOptions.branch}`]).then(() => {
+                                                                            core.info(`---------- deploy successful -----------`);
+                                                                        })
 
                                                                     })
                                                                 })
