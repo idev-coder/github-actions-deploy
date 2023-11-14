@@ -116,60 +116,6 @@ function gitDeploy(options) {
 }
 
 
-function git(options) {
-    const repo = options.repo ? options.repo : `https://git:${options.github_token}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`
-    spawn('git', ['config', '--global', 'user.name', options.user.name]).then(() => {
-        spawn('git', ['config', '--global', 'user.email', options.user.email]).then(() => {
-            spawn('git', ['remote', 'set-url', options.remote, repo]).then(() => {
-
-                spawn('git', ['config', 'user.name']).then(output => {
-                    core.info(`---------- config username -----------`);
-                    core.info(`name: ${output}`);
-                })
-
-                spawn('git', ['config', 'user.email']).then(output => {
-                    core.info(`---------- config email -----------`);
-                    core.info(`email: ${output}`);
-                })
-
-                spawn('git', ['config', '--get', 'remote.' + options.remote + '.url']).then(output => {
-                    core.info(`---------- set url repo -----------`);
-                    const repo = output && output.split(/[\n\r]/).shift();
-                    core.info(`url-repo: ${repo}`);
-
-                    spawn('git', ['rev-parse', '--abbrev-ref', 'HEAD']).then(originBranch => {
-                        core.info(`---------- check base branch -----------`);
-                        core.info(`branch: ${originBranch}`);
-                        options.originBranch = originBranch
-                        spawn('git', ['checkout', '-b', `${options.branch}`]).then(() => {
-                            spawn('ls').then((list) => {
-                                core.info(list)
-                                if (list.trim().includes(options.dist)) {
-                                    gitDeploy(options)
-                                } else {
-                                    spawn('npm', ['install']).then(() => {
-                                        spawn('npm', ['run', 'build']).then(() => {
-                                            gitDeploy(options)
-                                        })
-                                    })
-                                }
-                            })
-
-
-
-                        })
-
-                    })
-                })
-
-
-
-            })
-        })
-    })
-}
-
-
 function main() {
     const defaults = {
         branch: 'gh-pages',
@@ -215,7 +161,56 @@ function main() {
     };
 
     const newOptions = Object.assign({}, defaults, config);
-    git(newOptions)
+    const repo = newOptions.repo ? newOptions.repo : `https://git:${newOptions.github_token}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`
+    spawn('git', ['config', '--global', 'user.name', newOptions.user.name]).then(() => {
+        spawn('git', ['config', '--global', 'user.email', newOptions.user.email]).then(() => {
+            spawn('git', ['remote', 'set-url', newOptions.remote, repo]).then(() => {
+
+                spawn('git', ['config', 'user.name']).then(output => {
+                    core.info(`---------- config username -----------`);
+                    core.info(`name: ${output}`);
+                })
+
+                spawn('git', ['config', 'user.email']).then(output => {
+                    core.info(`---------- config email -----------`);
+                    core.info(`email: ${output}`);
+                })
+
+                spawn('git', ['config', '--get', 'remote.' + newOptions.remote + '.url']).then(output => {
+                    core.info(`---------- set url repo -----------`);
+                    const repo = output && output.split(/[\n\r]/).shift();
+                    core.info(`url-repo: ${repo}`);
+
+                    spawn('git', ['rev-parse', '--abbrev-ref', 'HEAD']).then(originBranch => {
+                        core.info(`---------- check base branch -----------`);
+                        core.info(`branch: ${originBranch}`);
+                        newOptions.originBranch = originBranch
+                        spawn('git', ['checkout', '-b', `${newOptions.branch}`]).then(() => {
+                            spawn('ls').then((list) => {
+                                core.info(list)
+                                if (list.trim().includes(newOptions.dist)) {
+                                    gitDeploy(newOptions)
+                                } else {
+                                    spawn('npm', ['install']).then(() => {
+                                        spawn('npm', ['run', 'build']).then(() => {
+                                            gitDeploy(newOptions)
+                                        })
+                                    })
+                                }
+                            })
+
+
+
+                        })
+
+                    })
+                })
+
+
+
+            })
+        })
+    })
 
 
 
