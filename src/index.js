@@ -84,13 +84,13 @@ function main() {
     spawn('git', ['config', '--global', 'user.name', newOptions.user.name])
     spawn('git', ['config', 'user.name']).then(output => {
         core.info(`---------- config username -----------`);
-        core.info(`name: ${output.trim()}`);
+        core.info(`name: ${output}`);
     })
 
     spawn('git', ['config', '--global', 'user.email', newOptions.user.email])
     spawn('git', ['config', 'user.email']).then(output => {
         core.info(`---------- config email -----------`);
-        core.info(`email: ${output.trim()}`);
+        core.info(`email: ${output}`);
     })
 
     spawn('git', ['remote', 'set-url', newOptions.remote, repo])
@@ -101,47 +101,59 @@ function main() {
     })
     spawn('git', ['rev-parse', '--abbrev-ref', 'HEAD']).then(originBranch => {
         core.info(`---------- check base branch -----------`);
-        core.info(`branch: ${originBranch.trim()}`);
+        core.info(`branch: ${originBranch}`);
 
-        spawn('git', ['checkout', '--orphan', `${newOptions.branch}`]).then(output => {
+        spawn('git', ['checkout', '-b', `${newOptions.branch}`]).then(output => {
 
-            spawn('git', ['ls-remote', '--heads', `${newOptions.remote}`, `${newOptions.branch}`]).then(output => {
-                if (output) {
-                    core.info(`---------- update branch -----------`);
-                    core.info(`${output.trim()}`);
-                    spawn('git', ['rm','-rf', `!('${newOptions.dist}')`])
-                    spawn('git', ['mv','-v', `${newOptions.dist}/*`, './'])
-                    spawn('git', ['rm','-rf', `${newOptions.dist}`])
-                    spawn('git', ['status', '--porcelain']).then((output) => {
-                        if (!output.trim()) {
-                            core.info(`Nothing to deploy`);
-                        } else {
-                            spawn('git', ['add', '.'])
-                            spawn('git', ['commit', '-m', newOptions.message ? newOptions.message : `Deploying ${newOptions.branch} from ${originBranch}`])
-                            spawn('git', ['push', `${newOptions.remote}`, `${newOptions.branch}`])
-                            core.info(`---------- deploy successful -----------`);
-                        }
+            spawn('git', ['rm', '-rf', `.`]).then((output) => {
+                core.info("git remove all");
+                spawn('git', ['restore', '--staged', `${newOptions.dist}/*`,'.gitignore']).then((output) => {
+                    core.info("git restore");
+                    spawn('git', ['checkout', '--', `${newOptions.dist}/*`,'.gitignore']).then((output) => {
+                        core.info("git checkout");
+                        spawn('cp', ['-r', `${newOptions.dist}/.`, './']).then((output) => {
+                            core.info("git move file");
+                            spawn('git', ['rm', '-rf', `${newOptions.dist}`]).then((output) => {
+                                core.info("git remove floder");
+                                spawn('git', ['add', '.']).then((output) => {
+                                    core.info("git add all");
+                                    spawn('git', ['commit', '-m', newOptions.message ? newOptions.message : `Deploying ${newOptions.branch} from ${originBranch}`]).then((output) => {
+                                        core.info("git commit");
+                                        spawn('git', ['push', `${newOptions.remote}`, `${newOptions.branch}`]).then((output) => {
+                                            core.info("git push");
+                                        }).catch(error => {
+                                            core.info("error git push");
+                                        })
+                                    }).catch(error => {
+                                        core.info("error git commit");
+                                    })
+
+                                }).catch(error => {
+                                    core.info("error git add all");
+                                })
+
+                            }).catch(error => {
+                                core.info("error git remove floder");
+                            })
+
+
+                        }).catch(error => {
+                            core.info("error git move file");
+                        })
+
+                    }).catch(error => {
+                        core.info("error git checkout");
                     })
 
+                }).catch(error => {
+                    core.info("error git restore");
+                })
 
-                } else {
-                    core.info(`---------- new branch -----------`);
-                    core.info(`${output.trim()}`);
-                    spawn('git', ['rm','-rf', `!('${newOptions.dist}')`])
-                    spawn('git', ['mv','-v', `${newOptions.dist}/*`, './'])
-                    spawn('git', ['rm','-rf', `${newOptions.dist}`])
-                    spawn('git', ['status', '--porcelain']).then((output) => {
-                        if (!output.trim()) {
-                            core.info(`Nothing to deploy`);
-                        } else {
-                            spawn('git', ['add', '.'])
-                            spawn('git', ['commit', '-m', newOptions.message ? newOptions.message : `Deploying ${newOptions.branch} from ${originBranch}`])
-                            spawn('git', ['push', `${newOptions.remote}`, `${newOptions.branch}`])
-                            core.info(`---------- deploy successful -----------`);
-                        }
-                    })
-                }
+            }).catch(error => {
+                core.info("error git remove all");
             })
+
+            core.info(`---------- deploy successful -----------`);
 
 
         })
