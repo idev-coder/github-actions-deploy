@@ -105,7 +105,7 @@ function main() {
                     core.info(`---------- check base branch -----------`);
                     core.info(`branch: ${originBranch}`);
 
-                    spawn('git', ['checkout', '-b', `${newOptions.branch}`]).then(() => {
+                    spawn('git', ['checkout', '--orphan', `${newOptions.branch}`]).then(() => {
 
                         spawn('git', ['ls-remote', '--heads', `${newOptions.remote}`, `${newOptions.branch}`]).then(output => {
                             if (output) {
