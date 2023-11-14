@@ -39,8 +39,8 @@ function gitDeploy(options) {
 
             core.info(`info => ${output.trim()}`);
             spawn('rm', ['-rf', `!(${options.dist})`]).then(() => {
-                spawn('git', ['restore', '--staged', `${options.dist}/*`, '.gitignore', '.github/*']).then(() => {
-                    spawn('git', ['checkout', '--', `${options.dist}/*`, '.gitignore', '.github/*']).then(() => {
+                spawn('git', ['restore', '--staged', '.gitignore', '.github/*']).then(() => {
+                    spawn('git', ['checkout', '--', '.gitignore', '.github/*']).then(() => {
                         spawn('cp', ['-r', `${options.dist}/.`, './']).then(() => {
                             spawn('git', ['rm', '-rf', `${options.dist}`]).then(() => {
                                 spawn('git', ['status', '--porcelain']).then((output) => {
@@ -76,8 +76,8 @@ function gitDeploy(options) {
             core.info(`---------- new branch -----------`);
             core.info(`branch:${options.branch}`);
             spawn('rm', ['-rf', `!(${options.dist})`]).then(() => {
-                spawn('git', ['restore', '--staged', `${options.dist}/*`, '.gitignore', '.github/*']).then(() => {
-                    spawn('git', ['checkout', '--', `${options.dist}/*`, '.gitignore', '.github/*']).then(() => {
+                spawn('git', ['restore', '--staged', '.gitignore', '.github/*']).then(() => {
+                    spawn('git', ['checkout', '--', '.gitignore', '.github/*']).then(() => {
                         spawn('cp', ['-r', `${options.dist}/.`, './']).then(() => {
                             spawn('git', ['rm', '-rf', `${options.dist}`]).then(() => {
                                 spawn('git', ['status', '--porcelain']).then((output) => {
