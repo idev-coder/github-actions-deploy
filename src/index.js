@@ -50,7 +50,7 @@ function gitDeploy(options) {
                                         core.info(`Nothing to deploy`);
                                     } else {
                                         spawn('git', ['add', '.']).then(() => {
-                                            spawn('git', ['commit', '-m', options.message ? options.message : `Deploying ${options.branch} from ${originBranch}`]).then(() => {
+                                            spawn('git', ['commit', '-m', options.message ? options.message : `Deploying ${options.branch} from ${options.originBranch}`]).then(() => {
                                                 core.info(`----------- Pull Successful -----------`);
                                                 spawn('git', ['push', `${options.remote}`, `${options.branch}`]).then(() => {
                                                     core.info(`---------- deploy successful -----------`);
@@ -89,7 +89,7 @@ function gitDeploy(options) {
                                         core.info(`Nothing to deploy`);
                                     } else {
                                         spawn('git', ['add', '.']).then(() => {
-                                            spawn('git', ['commit', '-m', options.message ? options.message : `Deploying ${options.branch} from ${originBranch}`]).then(() => {
+                                            spawn('git', ['commit', '-m', options.message ? options.message : `Deploying ${options.branch} from ${options.originBranch}`]).then(() => {
                                                 spawn('git', ['push', `${options.remote}`, `${options.branch}`]).then(() => {
                                                     core.info(`---------- deploy successful -----------`);
                                                 })
@@ -140,7 +140,7 @@ function git(options) {
                     spawn('git', ['rev-parse', '--abbrev-ref', 'HEAD']).then(originBranch => {
                         core.info(`---------- check base branch -----------`);
                         core.info(`branch: ${originBranch}`);
-
+                        options.originBranch = originBranch
                         spawn('git', ['checkout', '-b', `${options.branch}`]).then(() => {
                             spawn('ls').then((list) => {
                                 core.info(list)
