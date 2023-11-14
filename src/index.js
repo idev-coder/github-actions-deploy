@@ -111,7 +111,7 @@ function main() {
                             if (output) {
                                 core.info(`---------- update branch -----------`);
                                 core.info(`branch:${newOptions.branch}`);
-                                spawn('git', ['pull', `${newOptions.remote}`, `${newOptions.branch}`]).then(() => {
+                                spawn('git', ['pull']).then(() => {
                                     spawn('git', ['rm', '-rf', `.`]).then(() => {
                                         spawn('git', ['restore', '--staged', `${newOptions.dist}/*`, '.gitignore']).then(() => {
                                             spawn('git', ['checkout', '--', `${newOptions.dist}/*`, '.gitignore']).then(() => {
