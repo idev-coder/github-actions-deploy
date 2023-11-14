@@ -111,32 +111,30 @@ function main() {
                                 if (output.trim().includes(newOptions.branch)) {
                                     core.info(`---------- update branch -----------`);
                                     core.info(`branch:${newOptions.branch}`);
-                                    spawn('git', ['pull', `${newOptions.remote}`, `${newOptions.branch}`]).then((output) => {
-                                        core.info(`----------- Pull Successful -----------`);
-                                        core.info(`info => ${output.trim()}`);
-                                        spawn('git', ['rm', '-rf', `.`]).then(() => {
-                                            spawn('git', ['restore', '--staged', `${newOptions.dist}/*`, '.gitignore']).then(() => {
-                                                spawn('git', ['checkout', '--', `${newOptions.dist}/*`, '.gitignore']).then(() => {
-                                                    spawn('cp', ['-r', `${newOptions.dist}/.`, './']).then(() => {
-                                                        spawn('git', ['rm', '-rf', `${newOptions.dist}`]).then(() => {
-                                                            spawn('git', ['status', '--porcelain']).then((output) => {
-                                                                if (!output) {
-                                                                    core.info(`Nothing to deploy`);
-                                                                } else {
-                                                                    spawn('git', ['add', '.']).then(() => {
-                                                                        spawn('git', ['commit', '-m', newOptions.message ? newOptions.message : `Deploying ${newOptions.branch} from ${originBranch}`]).then(() => {
-                                                                            spawn('git', ['push', `${newOptions.remote}`, `${newOptions.branch}`]).then(() => {
-                                                                                core.info(`---------- deploy successful -----------`);
-                                                                            })
-
+                                    // spawn('git', ['pull', `${newOptions.remote}`, `${newOptions.branch}`]).then((output) => {
+                                    core.info(`----------- Pull Successful -----------`);
+                                    core.info(`info => ${output.trim()}`);
+                                    spawn('git', ['rm', '-rf', `.`]).then(() => {
+                                        spawn('git', ['restore', '--staged', `${newOptions.dist}/*`, '.gitignore']).then(() => {
+                                            spawn('git', ['checkout', '--', `${newOptions.dist}/*`, '.gitignore']).then(() => {
+                                                spawn('cp', ['-r', `${newOptions.dist}/.`, './']).then(() => {
+                                                    spawn('git', ['rm', '-rf', `${newOptions.dist}`]).then(() => {
+                                                        spawn('git', ['status', '--porcelain']).then((output) => {
+                                                            if (!output) {
+                                                                core.info(`Nothing to deploy`);
+                                                            } else {
+                                                                spawn('git', ['add', '.']).then(() => {
+                                                                    spawn('git', ['commit', '-m', newOptions.message ? newOptions.message : `Deploying ${newOptions.branch} from ${originBranch}`]).then(() => {
+                                                                        spawn('git', ['push', `${newOptions.remote}`, `${newOptions.branch}`]).then(() => {
+                                                                            core.info(`---------- deploy successful -----------`);
                                                                         })
 
                                                                     })
 
-                                                                }
-                                                            })
-                                                        })
+                                                                })
 
+                                                            }
+                                                        })
                                                     })
 
                                                 })
@@ -144,9 +142,11 @@ function main() {
                                             })
 
                                         })
-                                    }).catch((err) => {
-                                        core.info(`Pull Error`);
+
                                     })
+                                    // }).catch((err) => {
+                                    //     core.info(`Pull Error`);
+                                    // })
 
 
 
