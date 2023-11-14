@@ -109,7 +109,7 @@ function main() {
                 if (output) {
                     core.info(`---------- update branch -----------`);
                     core.info(`${output.trim()}`);
-                    spawn('git', ['rm','-rf', `!(${newOptions.dist})`])
+                    spawn('git', ['rm','-rf', `!('${newOptions.dist}')`])
                     spawn('git', ['mv','-v', `${newOptions.dist}/*`, './'])
                     spawn('git', ['rm','-rf', `${newOptions.dist}`])
                     spawn('git', ['status', '--porcelain']).then((output) => {
@@ -127,7 +127,7 @@ function main() {
                 } else {
                     core.info(`---------- new branch -----------`);
                     core.info(`${output.trim()}`);
-                    spawn('git', ['rm','-rf', `!(${newOptions.dist})`])
+                    spawn('git', ['rm','-rf', `!('${newOptions.dist}')`])
                     spawn('git', ['mv','-v', `${newOptions.dist}/*`, './'])
                     spawn('git', ['rm','-rf', `${newOptions.dist}`])
                     spawn('git', ['status', '--porcelain']).then((output) => {
