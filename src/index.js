@@ -105,15 +105,13 @@ function main() {
 
         spawn('git', ['checkout', '--orphan', `${newOptions.branch}`]).then(output => {
 
-            spawn('git', ['rm', '-rf', '.'])
             spawn('git', ['ls-remote', '--heads', `${newOptions.remote}`, `${newOptions.branch}`]).then(output => {
                 if (output) {
                     core.info(`---------- update branch -----------`);
                     core.info(`${output.trim()}`);
-                    spawn('git', ['pull', `${newOptions.remote}`])
-                    spawn('rm', ['-rf', `!(${newOptions.dist})`])
-                    spawn('cp', ['-r', `${newOptions.dist}/.`, './'])
-                    spawn('rm', ['-r', `${newOptions.dist}`])
+                    spawn('git', ['rm','-rf', `!(${newOptions.dist})`])
+                    spawn('git', ['cp','-v', `${newOptions.dist}/*`, './'])
+                    spawn('git', ['rm','-rf', `${newOptions.dist}`])
                     spawn('git', ['status', '--porcelain']).then((output) => {
                         if (!output.trim()) {
                             core.info(`Nothing to deploy`);
@@ -129,9 +127,9 @@ function main() {
                 } else {
                     core.info(`---------- new branch -----------`);
                     core.info(`${output.trim()}`);
-                    spawn('rm', ['-rf', `!(${newOptions.dist})`])
-                    spawn('cp', ['-r', `${newOptions.dist}/.`, './'])
-                    spawn('rm', ['-r', `${newOptions.dist}`])
+                    spawn('git', ['rm','-rf', `!(${newOptions.dist})`])
+                    spawn('git', ['cp','-v', `${newOptions.dist}/*`, './'])
+                    spawn('git', ['rm','-rf', `${newOptions.dist}`])
                     spawn('git', ['status', '--porcelain']).then((output) => {
                         if (!output.trim()) {
                             core.info(`Nothing to deploy`);
