@@ -16,13 +16,18 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - run: npm i
       - name: Github Actions Deploy
-        uses: idev-coder/github-actions-deploy@v1.0.0
+        uses: ./
         with:
           github_token: ${{secrets.GITHUB_TOKEN}}
           dist: 'dist'
           branch: test
           message: 'Updates Test'
+      - run: ls
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
   

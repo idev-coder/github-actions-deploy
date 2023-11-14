@@ -3,10 +3,10 @@ const path = require('path');
 const core = require('@actions/core');
 const addr = require('email-addresses');
 const github = require('@actions/github');
-// const { getOctokit, context } = require('@actions/github');
+const { getOctokit, context } = require('@actions/github');
 const { publish, defaults } = require('./publish');
-// const { spawn } = require('./spawn')
-// const { createBranch } = require('./create-branch')
+const { spawn } = require('./spawn')
+const { createBranch } = require('./create-branch')
 
 function deploy(dist, config) {
     return new Promise((resolve, reject) => {
@@ -93,28 +93,48 @@ function main() {
             remote: options.remote,
             push: !!options.push,
             history: !!options.history,
-            user: {
-                name: user.name ? user.name : `${github.context.actor}`,
-                email: user.email ? user.email : `${github.context.actor}@users.noreply.github.com`
+            user: user ? user : {
+                name: `${github.context.repo.owner}`,
+                email: `${github.context.repo.owner}@users.noreply.github.com`
             },
             beforeAdd: beforeAdd,
         };
 
+
+
         const newOptions = Object.assign({}, defaults, config);
 
-        // const repo = newOptions.repo ? newOptions.repo : `https://${github.context.actor}:${newOptions.github_token}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`
-        core.info(`newOptions => ${newOptions}`);
+        const repo = newOptions.repo ? newOptions.repo : `https://${github.context.repo.owner}:${newOptions.github_token}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`
+       
 
-        // spawn("git", ["config", "--global", "user.email", newOptions.user.email])
-        // spawn("git", ["config", "--global", "user.name", newOptions.user.name])
-        // spawn("git", ["remote", "set-url", newOptions.remote, repo])
+        spawn("git", ["config", "--global", "user.name", newOptions.user.name])
+        spawn('git', ['config', 'user.name']).then(output => {
+            core.info(`--- Github Config Username ---`);
+            core.info(`name: ${output.trim()}`);
+        })
 
-        // core.debug(`Creating branch ${newOptions.branch}`);
-        // createBranch(getOctokit, context, newOptions).then((isCreated) => {
-        //     core.setOutput('created', isCreated);
-        // }).catch((error) => {
-        //     core.setFailed(error.message);
-        // })
+        spawn("git", ["config", "--global", "user.email", newOptions.user.email])
+        spawn('git', ['config', 'user.email']).then(output => {
+            core.info(`--- Github Config Email ---`);
+            core.info(`email: ${output.trim()}`);
+        })
+
+        spawn("git", ["remote", "set-url", newOptions.remote, repo])
+        spawn("git", ["config", "--get", 'remote.' + newOptions.remote + '.url']).then(output => {
+            core.info(`--- Github Remote Chenge Repo ---`);
+            const repo = output && output.split(/[\n\r]/).shift();
+            core.info(repo);
+        })
+        spawn("git", ["rev-parse", "--abbrev-ref", "HEAD"]).then(output => {
+            core.info(`--- Github Get Branch Original ---`);
+            core.info(`branch: ${output.trim()}`);
+        })
+        // core.info(`Original branch ${newOptions.branch}`);
+        
+        spawn("git", ["checkout ", "-b", newOptions.branch]).then(output => {
+            core.info(`--- Github New Branch ---`);
+            core.info(`branch: ${output.trim()}`);
+        })
 
         // return deploy(options.dist, config);
 
@@ -122,9 +142,9 @@ function main() {
 }
 
 main()
-    // .then(() => {
-    //     process.stdout.write('Published\n');
-    // })
-    // .catch((err) => {
-    //     process.stderr.write(`${err.stack}\n`, () => process.exit(1));
-    // });
+// .then(() => {
+//     process.stdout.write('Published\n');
+// })
+// .catch((err) => {
+//     process.stderr.write(`${err.stack}\n`, () => process.exit(1));
+// });

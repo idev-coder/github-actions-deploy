@@ -5,7 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "ncc build src/index.js --minify",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "act -C ./",
+    "start":"npm run build && npm run test"
   },
   "keywords": [],
   "author": "",
