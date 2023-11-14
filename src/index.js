@@ -103,18 +103,47 @@ function main() {
         core.info(`---------- check base branch -----------`);
         core.info(`branch: ${originBranch.trim()}`);
 
-        spawn('git', ['checkout', '-b', `${newOptions.branch}`]).then(output => {
-            core.info(`---------- new branch -----------`);
-            core.info(`${output.trim()}`);
-            spawn('rm', ['-rf', `!(${newOptions.dist})`])
-            spawn('cp', ['-r', `${newOptions.dist}/.`, './'])
-            spawn('rm', ['-r', `${newOptions.dist}`])
-            spawn('git', ['add', '.'])
-            spawn('git', ['commit', '-m', newOptions.message ? newOptions.message : `Deploying ${newOptions.branch} from ${originBranch}`])
-            spawn('git', ['push', `${newOptions.remote}`, `${newOptions.branch}`])
-            spawn('git', ['checkout', '-b', `${originBranch}`]).then((output) => {
-                core.info(`---------- deploy successful -----------`);
+        spawn('git', ['checkout', '--orphan', `${newOptions.branch}`]).then(output => {
+
+            spawn('git', ['rm', '-rf', '.'])
+            spawn('git', ['ls-remote', '--heads', `${newOptions.remote}`, `${newOptions.branch}`]).then(output => {
+                if (output) {
+                    core.info(`---------- update branch -----------`);
+                    core.info(`${output.trim()}`);
+                    spawn('rm', ['-rf', `!(${newOptions.dist})`])
+                    spawn('cp', ['-r', `${newOptions.dist}/.`, './'])
+                    spawn('rm', ['-r', `${newOptions.dist}`])
+                    spawn('git', ['status', '--porcelain']).then((output) => {
+                        if (!output.trim()) {
+                            core.info(`Nothing to deploy`);
+                        } else {
+                            spawn('git', ['add', '.'])
+                            spawn('git', ['commit', '-m', newOptions.message ? newOptions.message : `Deploying ${newOptions.branch} from ${originBranch}`])
+                            spawn('git', ['push', `${newOptions.remote}`, `${newOptions.branch}`])
+                            core.info(`---------- deploy successful -----------`);
+                        }
+                    })
+
+
+                } else {
+                    core.info(`---------- new branch -----------`);
+                    core.info(`${output.trim()}`);
+                    spawn('rm', ['-rf', `!(${newOptions.dist})`])
+                    spawn('cp', ['-r', `${newOptions.dist}/.`, './'])
+                    spawn('rm', ['-r', `${newOptions.dist}`])
+                    spawn('git', ['status', '--porcelain']).then((output) => {
+                        if (!output.trim()) {
+                            core.info(`Nothing to deploy`);
+                        } else {
+                            spawn('git', ['add', '.'])
+                            spawn('git', ['commit', '-m', newOptions.message ? newOptions.message : `Deploying ${newOptions.branch} from ${originBranch}`])
+                            spawn('git', ['push', `${newOptions.remote}`, `${newOptions.branch}`])
+                            core.info(`---------- deploy successful -----------`);
+                        }
+                    })
+                }
             })
+
 
         })
 
