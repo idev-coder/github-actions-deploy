@@ -1,299 +1,111 @@
 #!/usr/bin/env node
-
+const path = require('path');
 const core = require('@actions/core');
-const exec = require('@actions/exec');
-const github = require('@actions/github');
+const ghpages = require('./publish');
 const addr = require('email-addresses');
+const github = require('@actions/github');
 
-const spawn = (exe, args, cwd) => {
+function publish(dist, config) {
     return new Promise((resolve, reject) => {
-        const buffer = [];
-        exec.exec(exe, args, {
-            cwd: cwd || process.cwd(),
-            listeners: {
-                stderr: (chunk) => {
-                    buffer.push(chunk.toString());
-                },
-                stdout: (chunk) => {
-                    buffer.push(chunk.toString());
-                },
+        const basePath = path.resolve(process.cwd(), dist);
+        ghpages.publish(basePath, config, (err) => {
+            if (err) {
+                return reject(err);
             }
-        }).then(code => {
-            const output = buffer.join('');
-            if (code) {
-                const msg = output || 'Process failed: ' + code;
-                reject(new ProcessError(code, msg));
-            } else {
-                resolve(output);
-            }
-        })
+            resolve();
+        });
     });
 }
 
+function main(args) {
+    // github.getOctokit(core.getInput('github_token'))
+    return Promise.resolve().then(() => {
+        const options = {
+            github_token: core.getInput('github_token') || process.env.GITHUB_TOKEN,
+            dist: core.getInput('dist'),
+            src: core.getInput('src') || ghpages.defaults.src,
+            branch: core.getInput('branch') || ghpages.defaults.branch,
+            dest: core.getInput('dest') || ghpages.defaults.dest,
+            add: core.getInput('add'),
+            silent: core.getInput('silent'),
+            message: core.getInput('message') || ghpages.defaults.message,
+            tag: core.getInput('tag'),
+            git: core.getInput('git') || ghpages.defaults.git,
+            dotfiles: core.getInput('dotfiles'),
+            repo: core.getInput('repo'),
+            depth: core.getInput('depth') || ghpages.defaults.depth,
+            remote: core.getInput('remote') || ghpages.defaults.remote,
+            user: core.getInput('user'),
+            remove: core.getInput('remove') || ghpages.defaults.remove,
+            push: core.getInput('no-push'),
+            history: core.getInput('no-history'),
+            beforeAdd: core.getInput('before-add')
 
-
-
-function main() {
-    const defaults = {
-        branch: 'gh-pages',
-        remote: 'origin'
-    };
-
-    const options = {
-        github_token: core.getInput('github_token') || process.env.GITHUB_TOKEN,
-        dist: core.getInput('dist'),
-        branch: core.getInput('branch') || defaults.branch,
-        message: core.getInput('message'),
-        repo: core.getInput('repo'),
-        remote: core.getInput('remote') || defaults.remote,
-        user: core.getInput('user'),
-    }
-
-
-    let user;
-    if (options.user) {
-        const parts = addr.parseOneAddress(options.user);
-        if (!parts) {
-            throw new Error(
-                `Could not parse name and email from user option '${options.user}' ` +
-                '(format should be "Your Name <email@example.com>")'
-            );
         }
-        user = { name: parts.name, email: parts.address };
-    }
 
 
+        let user;
+        if (options.user) {
+            const parts = addr.parseOneAddress(options.user);
+            if (!parts) {
+                throw new Error(
+                    `Could not parse name and email from user option "${options.user}" ` +
+                    '(format should be "Your Name <email@example.com>")'
+                );
+            }
+            user = { name: parts.name, email: parts.address };
+        }
+        let beforeAdd;
+        if (options.beforeAdd) {
+            const m = require(require.resolve(options.beforeAdd, {
+                paths: [process.cwd()],
+            }));
 
-    const config = {
-        github_token: options.github_token,
-        dist: options.dist,
-        repo: options.repo,
-        branch: options.branch,
-        message: options.message,
-        remote: options.remote,
-        user: user ? user : {
-            name: `${github.context.repo.owner}`,
-            email: `${github.context.repo.owner}@users.noreply.github.com`
-        },
-    };
-
-    const newOptions = Object.assign({}, defaults, config);
-    const repo = newOptions.repo ? newOptions.repo : `https://git:${newOptions.github_token}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`
-    spawn('git', ['config', '--global', 'user.name', newOptions.user.name]).then(() => {
-        spawn('git', ['config', '--global', 'user.email', newOptions.user.email]).then(() => {
-            spawn('git', ['remote', 'set-url', newOptions.remote, repo]).then(() => {
-
-                spawn('git', ['config', 'user.name']).then(output => {
-                    core.info(`---------- config username -----------`);
-                    core.info(`name: ${output}`);
-                })
-
-                spawn('git', ['config', 'user.email']).then(output => {
-                    core.info(`---------- config email -----------`);
-                    core.info(`email: ${output}`);
-                })
-
-                spawn('git', ['config', '--get', 'remote.' + newOptions.remote + '.url']).then(output => {
-                    core.info(`---------- set url repo -----------`);
-                    const repo = output && output.split(/[\n\r]/).shift();
-                    core.info(`url-repo: ${repo}`);
-
-                    spawn('git', ['rev-parse', '--abbrev-ref', 'HEAD']).then(originBranch => {
-                        core.info(`---------- check base branch -----------`);
-                        core.info(`branch: ${originBranch}`);
-                        spawn('git', ['checkout', '-b', `${newOptions.branch}`]).then(() => {
-                            spawn('ls').then((list) => {
-                                core.info(list)
-                                if (list.trim().includes(newOptions.dist)) {
-                                    spawn('git', ['ls-remote', '--heads', `${newOptions.remote}`, `${newOptions.branch}`]).then(output => {
-                                        core.info(`ls-remote => ${output.trim()}`);
-                                        if (output.trim().includes(newOptions.branch)) {
-                                            core.info(`---------- update branch -----------`);
-                                            core.info(`branch:${newOptions.branch}`);
-
-                                            core.info(`info => ${output.trim()}`);
-                                            spawn('rm', ['-rf', `!(${newOptions.dist})`]).then((rm) => {
-                                                core.info(rm)
-                                                spawn('git', ['restore', '--staged', '.gitignore', '.github/*']).then(() => {
-                                                    spawn('git', ['checkout', '--', '.gitignore', '.github/*']).then(() => {
-                                                        spawn('cp', ['-r', `${newOptions.dist}/.`, './']).then(() => {
-                                                            spawn('rm', ['-r', `${newOptions.dist}`]).then((rm) => {
-                                                                core.info(rm)
-                                                                spawn('git', ['status', '--porcelain']).then((output) => {
-                                                                    if (!output) {
-                                                                        core.info(`Nothing to deploy`);
-                                                                    } else {
-                                                                        spawn('git', ['add', '.']).then(() => {
-                                                                            spawn('git', ['commit', '-m', newOptions.message ? newOptions.message : `Deploying ${newOptions.branch} from ${originBranch}`]).then(() => {
-                                                                                core.info(`----------- Pull Successful -----------`);
-                                                                                spawn('git', ['push', `${newOptions.remote}`, `${newOptions.branch}`]).then(() => {
-                                                                                    core.info(`---------- deploy successful -----------`);
-                                                                                })
-
-                                                                            })
-                                                                        })
-
-                                                                    }
-                                                                })
-                                                            })
-
-                                                        })
-
-                                                    })
-
-                                                })
-
-                                            })
+            if (typeof m === 'function') {
+                beforeAdd = m;
+            } else if (typeof m === 'object' && typeof m.default === 'function') {
+                beforeAdd = m.default;
+            } else {
+                throw new Error(
+                    `Could not find function to execute before adding files in ` +
+                    `"${options.beforeAdd}".\n `
+                );
+            }
+        }
 
 
+        const config = {
+            github_token: options.github_token,
+            repo:  options.repo ? options.repo : `https://git:${options.github_token}@github.com/${github.context.repo.owner}/${github.context.repo.repo}.git`,
+            silent: !!options.silent,
+            branch: options.branch,
+            src: options.src,
+            dest: options.dest,
+            message: options.message,
+            tag: options.tag,
+            git: options.git,
+            depth: options.depth,
+            dotfiles: !!options.dotfiles,
+            add: !!options.add,
+            remove: options.remove,
+            remote: options.remote,
+            push: !!options.push,
+            history: !!options.history,
+            user:  user ? user : {
+                name: `${github.context.repo.owner}`,
+                email: `${github.context.repo.owner}@users.noreply.github.com`
+            },
+            beforeAdd: beforeAdd,
+        };
 
-
-                                        } else {
-                                            core.info(`---------- new branch -----------`);
-                                            core.info(`branch:${newOptions.branch}`);
-                                            spawn('rm', ['-rf', `!(${newOptions.dist})`]).then((rm) => {
-                                                core.info(rm)
-                                                spawn('git', ['restore', '--staged', '.gitignore', '.github/*']).then(() => {
-                                                    spawn('git', ['checkout', '--', '.gitignore', '.github/*']).then(() => {
-                                                        spawn('cp', ['-r', `${newOptions.dist}/.`, './']).then(() => {
-                                                            spawn('rm', ['-r', `${newOptions.dist}`]).then((rm) => {
-                                                                core.info(rm)
-                                                                spawn('git', ['status', '--porcelain']).then((output) => {
-                                                                    if (!output) {
-                                                                        core.info(`Nothing to deploy`);
-                                                                    } else {
-                                                                        spawn('git', ['add', '.']).then(() => {
-                                                                            spawn('git', ['commit', '-m', newOptions.message ? newOptions.message : `Deploying ${newOptions.branch} from ${originBranch}`]).then(() => {
-                                                                                spawn('git', ['push', `${newOptions.remote}`, `${newOptions.branch}`]).then(() => {
-                                                                                    core.info(`---------- deploy successful -----------`);
-                                                                                })
-
-                                                                            })
-
-                                                                        })
-
-                                                                    }
-                                                                })
-                                                            })
-
-                                                        })
-
-                                                    })
-
-                                                })
-
-                                            })
-
-                                        }
-                                    })
-                                } else {
-                                    spawn('npm', ['install']).then(() => {
-                                        spawn('npm', ['run', 'build']).then(() => {
-                                            spawn('git', ['ls-remote', '--heads', `${newOptions.remote}`, `${newOptions.branch}`]).then(output => {
-                                                core.info(`ls-remote => ${output.trim()}`);
-                                                if (output.trim().includes(newOptions.branch)) {
-                                                    core.info(`---------- update branch -----------`);
-                                                    core.info(`branch:${newOptions.branch}`);
-
-                                                    core.info(`info => ${output.trim()}`);
-                                                    spawn('rm', ['-rf', `!(${newOptions.dist})`]).then((rm) => {
-                                                        core.info(rm)
-                                                        spawn('git', ['restore', '--staged', '.gitignore', '.github/*']).then(() => {
-                                                            spawn('git', ['checkout', '--', '.gitignore', '.github/*']).then(() => {
-                                                                spawn('cp', ['-r', `${newOptions.dist}/.`, './']).then(() => {
-                                                                    spawn('rm', ['-r', `${newOptions.dist}`]).then((rm) => {
-                                                                        core.info(rm)
-                                                                        spawn('git', ['status', '--porcelain']).then((output) => {
-                                                                            if (!output) {
-                                                                                core.info(`Nothing to deploy`);
-                                                                            } else {
-                                                                                spawn('git', ['add', '.']).then(() => {
-                                                                                    spawn('git', ['commit', '-m', newOptions.message ? newOptions.message : `Deploying ${newOptions.branch} from ${originBranch}`]).then(() => {
-                                                                                        core.info(`----------- Pull Successful -----------`);
-                                                                                        spawn('git', ['push', `${newOptions.remote}`, `${newOptions.branch}`]).then(() => {
-                                                                                            core.info(`---------- deploy successful -----------`);
-                                                                                        })
-
-                                                                                    })
-                                                                                })
-
-                                                                            }
-                                                                        })
-                                                                    })
-
-                                                                })
-
-                                                            })
-
-                                                        })
-
-                                                    })
-
-
-
-
-                                                } else {
-                                                    core.info(`---------- new branch -----------`);
-                                                    core.info(`branch:${options.branch}`);
-                                                    spawn('rm', ['-rf', `!(${options.dist})`]).then((rm) => {
-                                                        core.info(rm)
-                                                        spawn('git', ['restore', '--staged', '.gitignore', '.github/*']).then(() => {
-                                                            spawn('git', ['checkout', '--', '.gitignore', '.github/*']).then(() => {
-                                                                spawn('cp', ['-r', `${options.dist}/.`, './']).then(() => {
-                                                                    spawn('rm', ['-r', `${options.dist}`]).then((rm) => {
-                                                                        core.info(rm)
-                                                                        spawn('git', ['status', '--porcelain']).then((output) => {
-                                                                            if (!output) {
-                                                                                core.info(`Nothing to deploy`);
-                                                                            } else {
-                                                                                spawn('git', ['add', '.']).then(() => {
-                                                                                    spawn('git', ['commit', '-m', options.message ? options.message : `Deploying ${options.branch} from ${options.originBranch}`]).then(() => {
-                                                                                        spawn('git', ['push', `${options.remote}`, `${options.branch}`]).then(() => {
-                                                                                            core.info(`---------- deploy successful -----------`);
-                                                                                        })
-
-                                                                                    })
-
-                                                                                })
-
-                                                                            }
-                                                                        })
-                                                                    })
-
-                                                                })
-
-                                                            })
-
-                                                        })
-
-                                                    })
-
-                                                }
-                                            })
-                                        })
-                                    })
-                                }
-                            })
-
-
-
-                        })
-
-                    })
-                })
-
-
-
-            })
-        })
-    })
-
-
-
-
-
-
+        return publish(options.dist, config);
+    });
 }
 
-main()
-
+main(process.argv)
+    .then(() => {
+        process.stdout.write('Published\n');
+    })
+    .catch((err) => {
+        process.stderr.write(`${err.stack}\n`, () => process.exit(1));
+    });
