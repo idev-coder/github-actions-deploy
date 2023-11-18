@@ -128,13 +128,7 @@ Git.prototype.checkout = function (remote, branch) {
                 .then(() => this.reset(remote, branch));
         },
         (error) => {
-            if (error.code === 2) {
-                // branch doesn't exist, create an orphan
-                return this.exec('checkout', '--orphan', branch);
-            } else {
-                // unhandled error
-                throw error;
-            }
+            return this.exec('checkout', '--orphan', branch);
         }
     );
 };
