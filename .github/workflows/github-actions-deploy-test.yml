@@ -23,7 +23,7 @@ jobs:
       - name: Github Actions Deploy
         uses: ./
         with:
-          github_token: ${{secrets.DEPLOY_TOKEN}}
+          github_token: ${{secrets.GIT_AUTH_TOKEN}}
           dist: dist
           branch: test
   
